@@ -98,7 +98,7 @@ function NavDrawer(props) {
 
   const getTitle = () => {
     switch (props.location.pathname.slice(1)) {
-      case "tasks":
+      case "user-tasks":
         return "User Tasks";
       case "manage":
         return "Manage";
@@ -143,7 +143,7 @@ function NavDrawer(props) {
             </ListItem>
           </Link>
 
-          <Link to="/tasks" className={classes.link}>
+          <Link to="/user-tasks" className={classes.link}>
             <ListItem button key="Tasks">
               <ListItemIcon>{<TaskListIcon />}</ListItemIcon>
               <ListItemText primary="User Tasks" />

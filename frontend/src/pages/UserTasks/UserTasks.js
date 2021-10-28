@@ -7,7 +7,6 @@ import "./UserTasks.css";
 import api from "../../utils/api";
 
 import Button from '@mui/material/Button';
-// import { DataGrid } from '@mui/x-data-grid';
 
 const AlwaysScrollToBottom = () => {
   const elementRef = useRef();
@@ -66,17 +65,21 @@ const ServerConsole = () => {
 export function UserTasks() {
   const dispatch = useDispatch();
 
+  const [firstTask, setFirstTask] = useState({})
+
+  api.get('/api/tasks')
+    .then(response => { 
+      setFirstTask(response)
+    })
+    .catch(err => console.log(err))
+
   return (
     <div>
-      <ServerConsole />
-      <Button
-        id="clear-btn"
-        variant="contained"
-        color="primary"
-        onClick={() => dispatch(consoleCleared())}
-      >
-        Clear Console
-      </Button>
+      <label>{firstTask['data'] ? firstTask['data']['data'][0]['Title'] : ""}</label>
+      <br/>
+      <label>{firstTask['data'] ? firstTask['data']['data'][1]['Title'] : ""}</label>
+      <br/>
+      <label>{firstTask['data'] ? firstTask['data']['data'][2]['Title'] : ""}</label>
     </div>
   );
 }

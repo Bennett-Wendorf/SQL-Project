@@ -63,7 +63,7 @@ function App() {
               <Route path="/manage">
                 <Manage />
               </Route>
-              <Route path="/tasks">
+              <Route path="/user-tasks">
                 <UserTasks />
               </Route>
               <Route path="/project">
