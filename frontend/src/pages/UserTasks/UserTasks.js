@@ -67,11 +67,11 @@ export function UserTasks() {
 
   const [firstTask, setFirstTask] = useState({})
 
-  api.get('/api/tasks')
+  useEffect(() => api.get('/api/tasks')
     .then(response => { 
       setFirstTask(response)
     })
-    .catch(err => console.log(err))
+    .catch(err => console.log(err)), [])
 
   return (
     <div>
