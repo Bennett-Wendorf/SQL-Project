@@ -29,6 +29,8 @@ const useStyles = makeStyles((theme) => ({
   toolbar: theme.mixins.toolbar,
 }));
 
+// TODO: Make sure this works on mobile too
+
 // Build the JSX to export for this component. This defines how the entire app is structured
 function App() {
   const classes = useStyles();
@@ -42,13 +44,13 @@ function App() {
           <Switch>
             <Redirect exact from="/" to="project" />
             <Route path="/manage">
-              <Manage />
+              <Manage pageTitle="Manage"/>
             </Route>
             <Route path="/user-tasks">
-              <UserTasks />
+              <UserTasks pageTitle="User Tasks"/>
             </Route>
             <Route path="/project">
-              <Project />
+              <Project pageTitle="Project"/>
             </Route>
           </Switch>
         </div>
