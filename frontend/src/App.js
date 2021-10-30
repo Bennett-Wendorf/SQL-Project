@@ -44,13 +44,13 @@ function App() {
           <Switch>
             <Redirect exact from="/" to="project" />
             <Route path="/manage">
-              <Manage pageTitle="Manage"/>
+              <Manage />
             </Route>
             <Route path="/user-tasks">
-              <UserTasks pageTitle="User Tasks"/>
+              <UserTasks />
             </Route>
             <Route path="/project">
-              <Project pageTitle="Project"/>
+              <Project />
             </Route>
           </Switch>
         </div>

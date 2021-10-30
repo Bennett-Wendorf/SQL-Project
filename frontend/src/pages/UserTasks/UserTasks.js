@@ -11,7 +11,7 @@ import FilterIcon from '@mui/icons-material/FilterAlt';
 import SortIcon from '@mui/icons-material/Sort';
 
 // Define this component
-export function UserTasks({ pageTitle }) {
+export function UserTasks() {
 
   // Define a piece of state to use to store information from the api call
   const [firstTask, setFirstTask] = useState({})
@@ -26,7 +26,7 @@ export function UserTasks({ pageTitle }) {
   // Return some JSX definine 3 labels with task data from the api call
   return (
     <div>
-      <Bar title={pageTitle}>
+      <Bar title="User Tasks">
         <IconButton aria-label="add" size="large" justify="left">
           <AddIcon />
         </IconButton>

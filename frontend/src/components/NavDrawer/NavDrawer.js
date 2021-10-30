@@ -51,7 +51,15 @@ const useStyles = makeStyles((theme) => ({
   },
   bottomPush: {
     display: "flex",
+    flexDirection: "column",
     justifyContent: "center",
+    alignContent: "flex-end",
+    height: "100%",
+  },
+  bottomPushItems: {
+    textAlign: "center",
+    marginTop: "auto",
+    marginBottom: "20px"
   },
   logoImg: {
     width: "30px",
@@ -111,23 +119,15 @@ function NavDrawer(props) {
             </ListItem>
           </Link>
 
-          {/* TODO: Make this into a <Menu /> */}
-          {/* TODO: Center this */}
-          {/* <ListItem className={classes.bottomPush}>
+        </List>
+        <div className={classes.bottomPush}>
+          <div className={classes.bottomPushItems}>
+            {/* TODO: Make this into a <Menu /> */}
             <IconButton aria-label="notifications" size="large">
               <PersonIcon />
             </IconButton>
-          </ListItem>
-
-          <ListItem className={classes.bottomPush}>
             <div>Am Programmr</div>
-          </ListItem> */}
-        </List>
-        <div className={classes.bottomPush}>
-          <IconButton aria-label="notifications" size="large" className={classes.bottomPush}>
-            <PersonIcon />
-          </IconButton>
-          <div>Am Programmr</div>
+          </div>
         </div>
       </Drawer>
     </div>
