@@ -1,6 +1,10 @@
 import React from "react";
-import { makeStyles } from "@mui/styles";
+import { Link, withRouter } from "react-router-dom";
 import "./NavDrawer.css";
+import logo from "./logo.png";
+
+// Import a bunch of mui components to help build the nav drawer
+import { makeStyles } from "@mui/styles";
 import Drawer from "@mui/material/Drawer";
 import CssBaseline from "@mui/material/CssBaseline";
 import AppBar from "@mui/material/AppBar"; 
@@ -15,13 +19,13 @@ import TaskListIcon from '@mui/icons-material/FormatListBulletedRounded';
 import FolderIcon from '@mui/icons-material/FolderOpenRounded';
 import ManageIcon from "@mui/icons-material/Settings";
 import PersonIcon from "@mui/icons-material/Person";
-import { Link, withRouter } from "react-router-dom";
-import logo from "./logo.png";
 import { IconButton } from "@mui/material";
 import { Grid } from "@mui/material"; 
 
+// Define what we want the width of the drawer to be
 const drawerWidth = 220;
 
+// Generate css to style everything nicely
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
@@ -59,14 +63,12 @@ const useStyles = makeStyles((theme) => ({
     position: "fixed",
     bottom: 0,
     textAlign: "center",
-    align: "right",
     paddingBottom: 15,
   },
   bottomPush2: {
     position: "fixed",
     bottom: 0,
     textAlign: "center",
-    align: "right",
     paddingBottom: 45,
   },
   logoImg: {
@@ -96,6 +98,7 @@ const useStyles = makeStyles((theme) => ({
 function NavDrawer(props) {
   const classes = useStyles();
 
+  // Get the title of the app bar based on the current page
   const getTitle = () => {
     switch (props.location.pathname.slice(1)) {
       case "user-tasks":
@@ -109,6 +112,7 @@ function NavDrawer(props) {
     }
   };
 
+  // Build the actual JSX to build the nav drawer
   return (
     <div className={classes.root}>
       <CssBaseline />
