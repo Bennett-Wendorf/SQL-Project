@@ -11,7 +11,7 @@ export function Project() {
     <div>
       <Bar title="Project">
         <Button aria-label="projects" size="medium" justify="left" startIcon={<DropDownIcon />}>
-          Project {/* TODO Add a project dropdown here*/}
+          Project {/* TODO Add a project dropdown here using <Select />*/}
         </Button>
       </Bar>
       <Button

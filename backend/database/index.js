@@ -8,7 +8,7 @@ const db = new sqlite3.Database('./data.db')
 function getTasks(req, res, next) {
 
     // Define the query to be run
-    let sql = `SELECT TaskID, Title
+    let sql = `SELECT *
                FROM Task`
 
     // Run the above query and then call the callback function given the full set of rows
@@ -19,8 +19,7 @@ function getTasks(req, res, next) {
         }
         // Set the response to this api call as the data from the database
         res.json({
-            "message":"success",
-            "data": rows
+            rows
         })
     })
 }
