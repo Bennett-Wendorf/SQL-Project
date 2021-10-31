@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, withRouter } from "react-router-dom";
 import "./NavDrawer.css";
 import logo from "../../res/logo.ico";
@@ -17,6 +17,8 @@ import FolderIcon from '@mui/icons-material/FolderOpenRounded';
 import ManageIcon from "@mui/icons-material/Settings";
 import PersonIcon from "@mui/icons-material/Person";
 import { IconButton } from "@mui/material";
+
+import {Menu, MenuItem} from "@mui/material"
 
 // Define what we want the width of the drawer to be
 const drawerWidth = 220;
@@ -76,6 +78,34 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+function PersonMenu(){
+
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const menuOpen = Boolean(menuAnchorEl)
+
+  const openMenu = (event) => {
+    setMenuAnchorEl(event.currentTarget)
+  }
+
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null)
+  }
+
+  return (
+    <>
+      <IconButton aria-label="Person" size="large" onClick={openMenu}>
+        <PersonIcon />
+      </IconButton>
+      <Menu anchorEl={menuAnchorEl} open={menuOpen} onClose={handleMenuClose} MenuListProps={{ 'aria-labelledby': 'basic-button', }}>
+        {/* TODO: Pull these from list of people in database */}
+        <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+        <MenuItem onClick={handleMenuClose}>My Account</MenuItem>
+        <MenuItem onClick={handleMenuClose}>Logout</MenuItem>
+      </Menu>
+    </>
+  )
+}
+
 function NavDrawer(props) {
   const classes = useStyles();
 
@@ -122,10 +152,7 @@ function NavDrawer(props) {
         </List>
         <div className={classes.bottomPush}>
           <div className={classes.bottomPushItems}>
-            {/* TODO: Make this into a <Menu /> */}
-            <IconButton aria-label="notifications" size="large">
-              <PersonIcon />
-            </IconButton>
+            {PersonMenu()}
             <div>Am Programmr</div>
           </div>
         </div>
