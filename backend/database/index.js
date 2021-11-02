@@ -17,6 +17,7 @@ function getTasks(req, res, next) {
             res.status(400).json({"error":err.message})
             return
         }
+
         // Set the response to this api call as the data from the database
         res.json({
             rows
@@ -24,4 +25,24 @@ function getTasks(req, res, next) {
     })
 }
 
-module.exports = { getTasks }
+function getPeople(req, res, next) {
+
+    // Define the query to be fun
+    let sql =  `SELECT *
+                FROM Person`
+
+    // Run the above query and call the callback to return all rows as json
+    db.all(sql, [], (err, rows) => {
+        if(err) {
+            res.status(400).json({"error": err.message})
+            return
+        }
+
+        // Set the response to be the new data
+        res.json({
+            rows
+        })
+    })
+}
+
+module.exports = { getTasks, getPeople }
