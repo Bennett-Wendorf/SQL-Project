@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import "./UserTasks.css";
 
 import api from "../../utils/api";
+import useStore from "../../utils/stores"
 import Bar from "../../components/Bar/Bar";
 import { Button, IconButton, Tooltip } from "@mui/material";
 import AddIcon from '@mui/icons-material/AddCircle';
@@ -61,6 +62,7 @@ export function UserTasks() {
   const [tasks, setTasks] = useState([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [newTaskProject, setNewTaskProject] = useState(-1) // TODO: Make this default to something more sensible
+  const { selectedPerson } = useStore()
 
   const handleClickOpen = () => {
     setIsDialogOpen(true)
@@ -68,6 +70,7 @@ export function UserTasks() {
 
   const handleClose = () => {
     setIsDialogOpen(false)
+    updateTasks()
   }
 
   // TODO Create a new task in the database and ensure data on the frontend is up to date
@@ -84,14 +87,20 @@ export function UserTasks() {
     setNewTaskProject(event.target.value)
   }
 
-  // The first time this component renders, make an api call to the backend endpoint and set that response to the piece of state
+  // Make an api call to the backend to update the list of tasks
   // TODO: Call this incrementally
-  useEffect(() => api.get('/api/tasks')
+  const updateTasks = () => {
+    api.get(`/api/tasks/person/${selectedPerson.personID}`)
     .then(response => { 
       // TODO: Check response for error
       setTasks(response)
+      console.log("Updating tasks");
     })
-    .catch(err => console.log(err)), [])
+    .catch(err => console.log(err))
+  }
+
+  // The first time this component renders, update the Tasks
+  useEffect(() => updateTasks(), [])
 
   // Return some JSX definine 3 labels with task data from the api call
   return (

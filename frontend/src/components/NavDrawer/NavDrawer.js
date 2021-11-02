@@ -3,6 +3,7 @@ import { Link, withRouter } from "react-router-dom";
 import "./NavDrawer.css";
 import logo from "../../res/logo.ico";
 import api from "../../utils/api";
+import useStore from "../../utils/stores"
 
 // Import a bunch of mui components to help build the nav drawer
 import { makeStyles } from "@mui/styles";
@@ -86,7 +87,8 @@ function PersonMenu(){
   const [people, setPeople] = useState([])
 
   // TODO: Make this piece of state global
-  const [selectedPerson, setSelectedPerson] = useState(null)
+  // const [selectedPerson, setSelectedPerson] = useState(null)
+  const { setSelectedPerson } = useStore()
 
   // TODO: Call this incrementally
   useEffect(() => api.get('/api/people')
@@ -104,9 +106,9 @@ function PersonMenu(){
     setMenuAnchorEl(null)
   }
 
-  const setPerson = (personID) => {
+  const setPerson = (personID, personName) => {
     setMenuAnchorEl(null)
-    setSelectedPerson(personID)
+    setSelectedPerson({ 'personID': personID, 'personName': personName })
     console.log(personID)
   }
 
@@ -115,13 +117,10 @@ function PersonMenu(){
       <IconButton aria-label="Person" size="large" onClick={openMenu}>
         <PersonIcon />
       </IconButton>
+      {/* Add a way to display which user is currently selected */}
       <Menu anchorEl={menuAnchorEl} open={menuOpen} onClose={handleMenuClose} MenuListProps={{ 'aria-labelledby': 'basic-button', }}>
-        {/* TODO: Pull these from list of people in database
-        <MenuItem onClick={() => {setPerson()}}>Profile</MenuItem>
-        <MenuItem onClick={handleMenuClose}>My Account</MenuItem>
-        <MenuItem onClick={handleMenuClose}>Logout</MenuItem> */}
         {people.map((row) => (
-            <MenuItem key={row.PersonID} onClick={() => setPerson(row.PersonID)}>{row.FirstName + " " + row.LastName}</MenuItem>
+            <MenuItem key={row.PersonID} onClick={() => setPerson(row.PersonID, row.FirstName + " " + row.LastName)}>{row.FirstName + " " + row.LastName}</MenuItem>
           ))}
       </Menu>
     </>
@@ -130,6 +129,8 @@ function PersonMenu(){
 
 function NavDrawer(props) {
   const classes = useStyles();
+
+  const { selectedPerson } = useStore()
 
   // Build the actual JSX to build the nav drawer
   return (
@@ -175,7 +176,7 @@ function NavDrawer(props) {
         <div className={classes.bottomPush}>
           <div className={classes.bottomPushItems}>
             {PersonMenu()}
-            <div>Am Programmr</div>
+            <div>{selectedPerson.personName}</div>
           </div>
         </div>
       </Drawer>
