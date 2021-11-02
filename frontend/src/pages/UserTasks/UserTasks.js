@@ -10,29 +10,26 @@ import { Button, IconButton, Tooltip } from "@mui/material";
 import AddIcon from '@mui/icons-material/AddCircle';
 import FilterIcon from '@mui/icons-material/FilterAlt';
 import SortIcon from '@mui/icons-material/Sort';
-import CheckIcon from '@mui/icons-material/CheckCircle';
+import CheckIcon from '@mui/icons-material/CheckCircleOutline';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox } from "@mui/material";
 
 import { TextField, Dialog, DialogActions, DialogContent, DialogTitle, Select, MenuItem } from "@mui/material";
 
-function BuildTable(props) {
-
-  var rows = [];
-  if(props){
-    rows = props
-  }
+function TaskTable({ rows }) {
 
   // TODO: Look into datagrid instead of table
+  // TODO: Add spinner when rows is empty array
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} aria-label="User's Tasks">
         <TableHead>
           <TableRow>
             <TableCell></TableCell>
-            <TableCell>TaskID</TableCell>
-            <TableCell align="right">Title</TableCell>
+            <TableCell>Title</TableCell>
+            <TableCell align="right">Project</TableCell>
+            <TableCell align="right">Due</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -46,10 +43,9 @@ function BuildTable(props) {
                   <Checkbox color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />}/>
                 </Tooltip>
               </TableCell>
-              <TableCell component="th" scope="row">
-                {row.TaskID}
-              </TableCell>
-              <TableCell align="right">{row.Title}</TableCell>
+              <TableCell>{row.Title}</TableCell>
+              <TableCell align="right" size="small">{row.ProjectID}</TableCell>
+              <TableCell align="right" size="small">{row.DueDate}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -89,8 +85,10 @@ export function UserTasks() {
   }
 
   // The first time this component renders, make an api call to the backend endpoint and set that response to the piece of state
+  // TODO: Call this incrementally
   useEffect(() => api.get('/api/tasks')
     .then(response => { 
+      // TODO: Check response for error
       setTasks(response)
     })
     .catch(err => console.log(err)), [])
@@ -115,10 +113,12 @@ export function UserTasks() {
           </IconButton>
         </Tooltip>
       </Bar>
-      {BuildTable(tasks.data ? tasks.data.rows : [])}
+      {/* {BuildTable(tasks.data ? tasks.data.rows : [])} */}
+      <TaskTable rows={tasks.data ? tasks.data.rows: []} />
       <Dialog open={isDialogOpen} onClose={handleClose}>
         <DialogTitle>Add a New Task</DialogTitle>
         <DialogContent>
+          {/* TODO: Limit how long these strings are so they don't break the database */}
           <TextField autoFocus id="Title" label="Title" type="text" fullWidth variant="outlined" margin="normal"/>
           <TextField id="Due" label="Due Date" type="date" InputLabelProps={{ shrink: true }} margin="normal"/>
           <Select labelId="project-select-label" id="project-select" value={newTaskProject} label="Project" onChange={handleProjectSelectChange}>

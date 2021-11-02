@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, withRouter } from "react-router-dom";
 import "./NavDrawer.css";
 import logo from "../../res/logo.ico";
+import api from "../../utils/api";
 
 // Import a bunch of mui components to help build the nav drawer
 import { makeStyles } from "@mui/styles";
@@ -82,6 +83,18 @@ function PersonMenu(){
 
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const menuOpen = Boolean(menuAnchorEl)
+  const [people, setPeople] = useState([])
+
+  // TODO: Make this piece of state global
+  const [selectedPerson, setSelectedPerson] = useState(null)
+
+  // TODO: Call this incrementally
+  useEffect(() => api.get('/api/people')
+    .then(response => { 
+      // TODO: Check response for error
+      setPeople(response.data ? response.data.rows : [])
+    })
+    .catch(err => console.log(err)), [])
 
   const openMenu = (event) => {
     setMenuAnchorEl(event.currentTarget)
@@ -91,16 +104,25 @@ function PersonMenu(){
     setMenuAnchorEl(null)
   }
 
+  const setPerson = (personID) => {
+    setMenuAnchorEl(null)
+    setSelectedPerson(personID)
+    console.log(personID)
+  }
+
   return (
     <>
       <IconButton aria-label="Person" size="large" onClick={openMenu}>
         <PersonIcon />
       </IconButton>
       <Menu anchorEl={menuAnchorEl} open={menuOpen} onClose={handleMenuClose} MenuListProps={{ 'aria-labelledby': 'basic-button', }}>
-        {/* TODO: Pull these from list of people in database */}
-        <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+        {/* TODO: Pull these from list of people in database
+        <MenuItem onClick={() => {setPerson()}}>Profile</MenuItem>
         <MenuItem onClick={handleMenuClose}>My Account</MenuItem>
-        <MenuItem onClick={handleMenuClose}>Logout</MenuItem>
+        <MenuItem onClick={handleMenuClose}>Logout</MenuItem> */}
+        {people.map((row) => (
+            <MenuItem key={row.PersonID} onClick={() => setPerson(row.PersonID)}>{row.FirstName + " " + row.LastName}</MenuItem>
+          ))}
       </Menu>
     </>
   )
