@@ -27,13 +27,9 @@ function getAllTasks(req, res, next) {
 
 function getPersonsTasks(req, res, next) {
 
-    console.log(req.params.id);
-
     if(req.params.id == -1){
         return getAllTasks(req, res, next)
     }
-
-    console.log(`Pulling tasks for user ${req.params.id}`);
 
     // TODO: Write this query to only pull tasks for the certain user
     // Define the query to be run

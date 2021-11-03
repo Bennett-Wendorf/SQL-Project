@@ -88,7 +88,7 @@ function PersonMenu(){
 
   // TODO: Make this piece of state global
   // const [selectedPerson, setSelectedPerson] = useState(null)
-  const { setSelectedPerson } = useStore()
+  const setSelectedPerson = useStore(state => state.setSelectedPerson)
 
   // TODO: Call this incrementally
   useEffect(() => api.get('/api/people')
@@ -108,8 +108,9 @@ function PersonMenu(){
 
   const setPerson = (personID, personName) => {
     setMenuAnchorEl(null)
+    // console.log("From setPerson in NavDrawer, personID: " + personID);
+    // console.log("From setPerson in NavDrawer, personName: " + personName);
     setSelectedPerson({ 'personID': personID, 'personName': personName })
-    console.log(personID)
   }
 
   return (

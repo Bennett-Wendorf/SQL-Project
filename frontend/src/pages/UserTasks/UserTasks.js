@@ -62,7 +62,7 @@ export function UserTasks() {
   const [tasks, setTasks] = useState([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [newTaskProject, setNewTaskProject] = useState(-1) // TODO: Make this default to something more sensible
-  const { selectedPerson } = useStore()
+  const selectedPerson = useStore(state => state.selectedPerson)
 
   const handleClickOpen = () => {
     setIsDialogOpen(true)
@@ -70,7 +70,7 @@ export function UserTasks() {
 
   const handleClose = () => {
     setIsDialogOpen(false)
-    updateTasks()
+    updateTasks(selectedPerson)
   }
 
   // TODO Create a new task in the database and ensure data on the frontend is up to date
@@ -89,8 +89,8 @@ export function UserTasks() {
 
   // Make an api call to the backend to update the list of tasks
   // TODO: Call this incrementally
-  const updateTasks = () => {
-    api.get(`/api/tasks/person/${selectedPerson.personID}`)
+  const updateTasks = (sp) => {
+    api.get(`/api/tasks/person/${sp.personID}`)
     .then(response => { 
       // TODO: Check response for error
       setTasks(response)
@@ -100,7 +100,15 @@ export function UserTasks() {
   }
 
   // The first time this component renders, update the Tasks
-  useEffect(() => updateTasks(), [])
+  useEffect(() => {
+    updateTasks(selectedPerson);
+    const unsub1 = useStore.subscribe((state) => {
+      updateTasks(state.selectedPerson)
+    });
+    return () => {
+      unsub1()
+    }
+  }, [])
 
   // Return some JSX definine 3 labels with task data from the api call
   return (
