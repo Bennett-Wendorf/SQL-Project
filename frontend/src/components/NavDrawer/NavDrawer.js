@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, withRouter } from "react-router-dom";
 import "./NavDrawer.css";
 import logo from "../../res/logo.ico";
+import api from "../../utils/api";
+import useStore from "../../utils/stores"
 
 // Import a bunch of mui components to help build the nav drawer
 import { makeStyles } from "@mui/styles";
@@ -17,6 +19,8 @@ import FolderIcon from '@mui/icons-material/FolderOpenRounded';
 import ManageIcon from "@mui/icons-material/Settings";
 import PersonIcon from "@mui/icons-material/Person";
 import { IconButton } from "@mui/material";
+
+import {Menu, MenuItem} from "@mui/material"
 
 // Define what we want the width of the drawer to be
 const drawerWidth = 220;
@@ -76,8 +80,58 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+function PersonMenu(){
+
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const menuOpen = Boolean(menuAnchorEl)
+  const [people, setPeople] = useState([])
+
+  // TODO: Make this piece of state global
+  // const [selectedPerson, setSelectedPerson] = useState(null)
+  const setSelectedPerson = useStore(state => state.setSelectedPerson)
+
+  // TODO: Call this incrementally
+  useEffect(() => api.get('/api/people')
+    .then(response => { 
+      // TODO: Check response for error
+      setPeople(response.data ? response.data.rows : [])
+    })
+    .catch(err => console.log(err)), [])
+
+  const openMenu = (event) => {
+    setMenuAnchorEl(event.currentTarget)
+  }
+
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null)
+  }
+
+  const setPerson = (personID, personName) => {
+    setMenuAnchorEl(null)
+    // console.log("From setPerson in NavDrawer, personID: " + personID);
+    // console.log("From setPerson in NavDrawer, personName: " + personName);
+    setSelectedPerson({ 'personID': personID, 'personName': personName })
+  }
+
+  return (
+    <>
+      <IconButton aria-label="Person" size="large" onClick={openMenu}>
+        <PersonIcon />
+      </IconButton>
+      {/* Add a way to display which user is currently selected */}
+      <Menu anchorEl={menuAnchorEl} open={menuOpen} onClose={handleMenuClose} MenuListProps={{ 'aria-labelledby': 'basic-button', }}>
+        {people.map((row) => (
+            <MenuItem key={row.PersonID} onClick={() => setPerson(row.PersonID, row.FirstName + " " + row.LastName)}>{row.FirstName + " " + row.LastName}</MenuItem>
+          ))}
+      </Menu>
+    </>
+  )
+}
+
 function NavDrawer(props) {
   const classes = useStyles();
+
+  const { selectedPerson } = useStore()
 
   // Build the actual JSX to build the nav drawer
   return (
@@ -122,11 +176,8 @@ function NavDrawer(props) {
         </List>
         <div className={classes.bottomPush}>
           <div className={classes.bottomPushItems}>
-            {/* TODO: Make this into a <Menu /> */}
-            <IconButton aria-label="notifications" size="large">
-              <PersonIcon />
-            </IconButton>
-            <div>Am Programmr</div>
+            {PersonMenu()}
+            <div>{selectedPerson.personName}</div>
           </div>
         </div>
       </Drawer>

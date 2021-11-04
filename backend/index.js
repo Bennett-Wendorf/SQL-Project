@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const options = {cors: {origin: "*",},};
-const { getTasks } = require('./database')
+const { getAllTasks, getPersonsTasks, getPeople } = require('./database')
 
 // Define the port to run the backend on as the enviroment variable for port, or 3500 if that variable is not defined
 const PORT = process.env.PORT || 3500;
@@ -11,8 +11,10 @@ const PORT = process.env.PORT || 3500;
 app.use(cors())
 app.use(express.json())
 
-// When a get request is made to this backend, call the getTaks function
-app.get('/api/tasks', getTasks)
+// When a get request is made to this backend, call the getTasks function
+app.get('/api/tasks', getAllTasks)
+app.get(`/api/tasks/person/:id`, (req, res, next) => getPersonsTasks(req, res, next))
+app.get('/api/people', getPeople)
 
 // Error handlers
 app.use((req, res) => res.status(404).send("404 NOT FOUND"))
