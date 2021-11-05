@@ -21,7 +21,7 @@ import { TextField, Dialog, DialogActions, DialogContent, DialogTitle, Select, M
 function TaskTable({ rows }) {
 
   // TODO: Look into datagrid instead of table
-  // TODO: Add spinner when rows is empty array
+  // TODO: Add spinner/message when rows is empty array
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} aria-label="User's Tasks">
@@ -130,7 +130,6 @@ export function UserTasks() {
           </IconButton>
         </Tooltip>
       </Bar>
-      {/* {BuildTable(tasks.data ? tasks.data.rows : [])} */}
       <TaskTable rows={tasks.data ? tasks.data.rows: []} />
       <Dialog open={isDialogOpen} onClose={handleClose}>
         <DialogTitle>Add a New Task</DialogTitle>
