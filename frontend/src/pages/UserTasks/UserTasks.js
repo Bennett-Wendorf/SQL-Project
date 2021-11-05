@@ -45,7 +45,7 @@ function TaskTable({ rows }) {
                 </Tooltip>
               </TableCell>
               <TableCell>{row.Title}</TableCell>
-              <TableCell align="right" size="small">{row.ProjectID}</TableCell>
+              <TableCell align="right" size="small">{row.ProjectTitle}</TableCell>
               <TableCell align="right" size="small">{row.DueDate}</TableCell>
             </TableRow>
           ))}
@@ -77,7 +77,7 @@ export function UserTasks() {
   const handleSubmit = () => {
     setIsDialogOpen(false)
     api.get('/api/tasks')
-    .then(response => { 
+    .then(response => {
       setTasks(response)
     })
     .catch(err => console.log(err))
@@ -91,7 +91,7 @@ export function UserTasks() {
   // TODO: Call this incrementally
   const updateTasks = (sp) => {
     api.get(`/api/tasks/person/${sp.personID}`)
-    .then(response => { 
+    .then(response => {
       // TODO: Check response for error
       setTasks(response)
       console.log("Updating tasks");
