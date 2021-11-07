@@ -55,9 +55,26 @@ function getPersonsTasks(req, res, next) {
     })
 }
 
-// TODO: Actually add this to the database
 function addTask(req, res, next) {
-    console.log(req.body)
+    const newObject = req.body
+
+    console.log(newObject);
+
+    var statement = db.prepare("INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES (?, ?, ?, ?, ?)")
+    statement.run(newObject.title, newObject.completion, (new Date(newObject.dueDate).getTime() / 1000), (new Date(newObject.creationDate).getTime() / 1000), newObject.projectID, function (error, result) {
+        console.log(this.lastID)
+        const newTaskID = this.lastID
+
+        if(newTaskID && newObject.assignee != -1){
+            var assignStatement = db.prepare("INSERT INTO Completes (DateAssigned, TaskID, PersonID) VALUES (?, ?, ?)")
+            assignStatement.run((new Date().getTime() / 1000), newTaskID, newObject.assignee)
+
+            assignStatement.finalize()
+        }
+    })
+
+    statement.finalize()
+
     res.send("Success")
 }
 

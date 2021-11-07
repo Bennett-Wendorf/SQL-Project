@@ -106,8 +106,6 @@ function PersonMenu(){
 
   const setPerson = (personID, personName) => {
     setMenuAnchorEl(null)
-    // console.log("From setPerson in NavDrawer, personID: " + personID);
-    // console.log("From setPerson in NavDrawer, personName: " + personName);
     setSelectedPerson({ 'personID': personID, 'personName': personName })
   }
 

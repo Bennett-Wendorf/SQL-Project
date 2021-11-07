@@ -52,6 +52,7 @@ function TaskTable({ rows }) {
                 </Tooltip>
               </TableCell>
               <TableCell>{row.Title}</TableCell>
+              {/* TODO: Handle projectID's of -1 */}
               <TableCell align="right" size="small">{row.ProjectTitle}</TableCell>
               <TableCell align="right" size="small">{new Date(row.DueDate * 1000).toLocaleDateString("en-US", dateFormatOptions)}</TableCell>
             </TableRow>
@@ -109,12 +110,14 @@ export function UserTasks() {
   const handleSubmit = (title, date, project) => {
     setIsDialogOpen(false)
 
+    // TODO: Assign this new task to the selected person
     const newTask = {
       title: title,
       completion: false,
       dueDate: date,
       creationDate: new Date(),
-      projectID: project
+      projectID: project,
+      assignee: selectedPerson.personID
     }
 
     console.log(newTask);
@@ -122,10 +125,9 @@ export function UserTasks() {
     api.post(`/api/tasks`, newTask)
       .then(response => {
         console.log(response);
+        updateTasks(selectedPerson)
       })
     
-    updateTasks(selectedPerson)
-
     // Set states for task attributes back to default
     setNewTaskProject(defaultNewProjectID)
     setNewTaskTitle(defaultNewTitle)
