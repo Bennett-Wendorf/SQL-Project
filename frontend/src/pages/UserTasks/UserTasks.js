@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 // Import css and api
 import "./UserTasks.css";
 
-import { makeStyles } from "@mui/styles";
 import api from "../../utils/api";
 import useStore from "../../utils/stores"
 import Bar from "../../components/Bar/Bar";
@@ -23,12 +22,6 @@ import { FormControl, InputLabel } from "@mui/material";
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DesktopDatePicker from '@mui/lab/DesktopDatePicker';
-
-const useStyles = makeStyles((theme) => ({
-  projectSelect: {
-    // width: '500px',
-  }
-}));
 
 function TaskTable({ rows }) {
 
@@ -69,8 +62,6 @@ function TaskTable({ rows }) {
 
 // Define this component
 export function UserTasks() {
-
-  const classes = useStyles()
 
   const defaultNewProjectID = -1
   const defaultNewTitle = ""
