@@ -23,7 +23,7 @@ CREATE TABLE Task (
     Title NVARCHAR(24) NOT NULL,
     Completion BOOLEAN NOT NULL,
     DueDate INTEGER NOT NULL,
-    CreationDate NVARCHAR(24) NOT NULL,
+    CreationDate INTEGER NOT NULL,
     ProjectID INTEGER NOT NULL,
     CONSTRAINT fk_task_project FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID)
 );
@@ -59,7 +59,7 @@ CREATE TABLE Completes (
    Populate Tables
 ********************************************************************************/
 -- Project --
-INSERT INTO Project (Title, DueDate) VALUES ('Rebrand', 1640930400); /* December 31st 2021 */
+INSERT INTO Project (Title, DueDate) VALUES ('Rebrand', 1640239200); /* December 23rd 2021 */
 INSERT INTO Project (Title, DueDate) VALUES ('Accounting Software', 1640930400); /* December 31st 2021 */
 
 -- Department --
@@ -76,14 +76,14 @@ INSERT INTO Person (FirstName, LastName, JobRole) VALUES ('Jane', 'Doe', 'Digita
 INSERT INTO Person (FirstName, LastName, JobRole) VALUES ('Andrew', 'Jones', 'Accountant');
 
 --Rebrand Tasks--
-INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES ('Rebrand Budget', FALSE, 1640930400, 1609480800, 1); /* December 31st 2021, Jamuart 31st 2021 */
-INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES ('New Logo', FALSE, 1640930400, 1609480800, 1); /* December 31st 2021, Jamuart 31st 2021 */
-INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES ('Update Companies Apps', FALSE, 1640930400, 1609480800, 1); /* December 31st 2021, Jamuart 31st 2021 */
+INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES ('Rebrand Budget', FALSE, 1639980000, 1611727200, 1); /* December 20th 2021, January 27th 2021 */
+INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES ('New Logo', FALSE, 1640066400, 1611813600, 1); /* December 21st 2021, January 28th 2021 */
+INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES ('Update Companies Apps', FALSE, 1640066400, 1611900000, 1); /* December 21st 2021, January 29th 2021 */
 
 --System Update Tasks--
-INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES ('Implementation', FALSE, 1640930400, 1609480800, 2); /* December 31st 2021, Jamuart 31st 2021 */
-INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES ('Reasearch', FALSE, 1640930400, 1609480800, 2); /* December 31st 2021, Jamuart 31st 2021 */
-INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES ('Software Budget', FALSE, 1640930400, 1609480800, 2); /* December 31st 2021, Jamuart 31st 2021 */
+INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES ('Implementation', FALSE, 1640152800, 1611986400, 2); /* December 22nd 2021, January 30th 2021 */
+INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES ('Reasearch', FALSE, 1640239200, 1611986400, 2); /* December 23rd 2021, January 30th 2021 */
+INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES ('Software Budget', FALSE, 1640930400, 1609480800, 2); /* December 31st 2021, January 31st 2021 */
 
 -- Houses --
 INSERT INTO Houses (ProjectID, DeptID) VALUES (1, 1);
@@ -96,8 +96,8 @@ INSERT INTO Houses (ProjectID, DeptID) VALUES (2, 3);
 INSERT INTO Houses (ProjectID, DeptID) VALUES (2, 4);
 
 -- Completes --
-INSERT INTO Completes (DateAssigned, TaskID, PersonID) VALUES ('January 2020', 1, 4);
-INSERT INTO Completes (DateAssigned, TaskID, PersonID) VALUES ('January 2020', 2, 3);
-INSERT INTO Completes (DateAssigned, TaskID, PersonID) VALUES ('January 2020', 3, 1);
-INSERT INTO Completes (DateAssigned, TaskID, PersonID) VALUES ('January 2020', 4, 3);
-INSERT INTO Completes (DateAssigned, TaskID, PersonID) VALUES ('January 2020', 6, 4);
+INSERT INTO Completes (DateAssigned, TaskID, PersonID) VALUES (1622091600, 1, 4); /* May 27th, 2021*/
+INSERT INTO Completes (DateAssigned, TaskID, PersonID) VALUES (1622178000, 2, 3); /* May 28th, 2021*/
+INSERT INTO Completes (DateAssigned, TaskID, PersonID) VALUES (1622264400, 3, 1); /* May 29th, 2021*/
+INSERT INTO Completes (DateAssigned, TaskID, PersonID) VALUES (1622350800, 4, 3); /* May 30th, 2021*/
+INSERT INTO Completes (DateAssigned, TaskID, PersonID) VALUES (1622437200, 6, 4); /* May 31st, 2021*/

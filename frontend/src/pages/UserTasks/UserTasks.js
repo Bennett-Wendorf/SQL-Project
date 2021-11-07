@@ -18,6 +18,8 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 
 import { TextField, Dialog, DialogActions, DialogContent, DialogTitle, Select, MenuItem } from "@mui/material";
 
+const dateFormatOptions = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }
+
 function TaskTable({ rows }) {
 
   // TODO: Look into datagrid instead of table
@@ -46,7 +48,7 @@ function TaskTable({ rows }) {
               </TableCell>
               <TableCell>{row.Title}</TableCell>
               <TableCell align="right" size="small">{row.ProjectTitle}</TableCell>
-              <TableCell align="right" size="small">{row.DueDate}</TableCell>
+              <TableCell align="right" size="small">{new Date(row.DueDate * 1000).toLocaleDateString("en-US", dateFormatOptions)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
