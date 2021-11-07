@@ -55,11 +55,37 @@ function getPersonsTasks(req, res, next) {
     })
 }
 
+// TODO: Actually add this to the database
+function addTask(req, res, next) {
+    console.log(req.body)
+    res.send("Success")
+}
+
 function getPeople(req, res, next) {
 
     // Define the query to be fun
     let sql =  `SELECT *
                 FROM Person`
+
+    // Run the above query and call the callback to return all rows as json
+    db.all(sql, [], (err, rows) => {
+        if(err) {
+            res.status(400).json({"error": err.message})
+            return
+        }
+
+        // Set the response to be the new data
+        res.json({
+            rows
+        })
+    })
+}
+
+function getProjects(req, res, next) {
+
+    // Define the query to be fun
+    let sql =  `SELECT *
+                FROM Project`
 
     // Run the above query and call the callback to return all rows as json
     db.all(sql, [], (err, rows) => {
@@ -100,4 +126,4 @@ function getProjectTasks(req, res, next) {
     })
 }
 
-module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjectTasks }
+module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, addTask }
