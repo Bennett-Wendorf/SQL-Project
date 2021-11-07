@@ -86,8 +86,6 @@ function PersonMenu(){
   const menuOpen = Boolean(menuAnchorEl)
   const [people, setPeople] = useState([])
 
-  // TODO: Make this piece of state global
-  // const [selectedPerson, setSelectedPerson] = useState(null)
   const setSelectedPerson = useStore(state => state.setSelectedPerson)
 
   // TODO: Call this incrementally
@@ -120,6 +118,7 @@ function PersonMenu(){
       </IconButton>
       {/* Add a way to display which user is currently selected */}
       <Menu anchorEl={menuAnchorEl} open={menuOpen} onClose={handleMenuClose} MenuListProps={{ 'aria-labelledby': 'basic-button', }}>
+        <MenuItem key={-1} onClick={() => setPerson(-1, "All Tasks")}>All Tasks</MenuItem>
         {people.map((row) => (
             <MenuItem key={row.PersonID} onClick={() => setPerson(row.PersonID, row.FirstName + " " + row.LastName)}>{row.FirstName + " " + row.LastName}</MenuItem>
           ))}

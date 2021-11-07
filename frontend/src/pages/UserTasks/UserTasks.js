@@ -80,7 +80,7 @@ export function UserTasks() {
   const [tasks, setTasks] = useState([])
   const [projects, setProjects] = useState([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [newTaskProjectID, setNewTaskProject] = useState(defaultNewProjectID) // TODO: Make this default to something more sensible
+  const [newTaskProjectID, setNewTaskProject] = useState(defaultNewProjectID)
   const [newTaskTitle, setNewTaskTitle] = useState(defaultNewTitle)
   const [newTaskDate, setNewTaskDate] = useState(defaultNewDate) // This will default to today
   const selectedPerson = useStore(state => state.selectedPerson)
