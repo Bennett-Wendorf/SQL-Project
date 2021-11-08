@@ -103,6 +103,19 @@ function updateTask(req, res, next) {
     res.send("Success")
 }
 
+// Delete the specified task from the database
+function deleteTask(req, res, next) {
+    // Prep the sql statement to be run
+    var statement = db.prepare(`DELETE FROM Task
+                                WHERE TaskID = ?`)
+
+    // Run the query with the passed id parameter
+    statement.run(req.params.id)
+
+    // TODO: Check for errors here before returning success
+    res.send("Success")
+}
+
 // Return all people from the database
 function getPeople(req, res, next) {
 
@@ -172,4 +185,4 @@ function getProjectTasks(req, res, next) {
 }
 
 // Export all functions to be imported elsewhere
-module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, addTask, updateTask }
+module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, addTask, updateTask, deleteTask }

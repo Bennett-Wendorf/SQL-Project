@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const options = {cors: {origin: "*",},};
-const { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, addTask, updateTask } = require('./database')
+const { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, addTask, updateTask, deleteTask } = require('./database')
 
 // Define the port to run the backend on as the enviroment variable for port, or 3500 if that variable is not defined
 const PORT = process.env.PORT || 3500;
@@ -18,6 +18,9 @@ app.route('/api/tasks')
 
 // Update the existing task with the specified id
 app.put('/api/tasks/:id', updateTask)
+
+// Delete the task with the specified id
+app.delete('/api/tasks/delete/:id', deleteTask)
 
 // Get all tasks assigned to the person with the specified id
 app.get(`/api/tasks/person/:id`, getPersonsTasks)

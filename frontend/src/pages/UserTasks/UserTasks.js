@@ -57,6 +57,7 @@ function TaskTable({ rows, projects, taskUpdate }) {
     setIsModifyDialogOpen(true)
     setCreationDate(task.CreationDate)
     setTaskID(task.TaskID)
+    console.log(`Opening modification window for task id: ${task.TaskID}`)
   }
 
   // Functions to handle changes in values for modification dialog
@@ -98,6 +99,17 @@ function TaskTable({ rows, projects, taskUpdate }) {
     .then(response => {
       taskUpdate(selectedPerson)
     })
+  }
+
+  // Handle when the delete button is pressed for a selected task
+  const handleDelete = () => {
+    setIsModifyDialogOpen(false)
+
+    // Make the call to the backend to delete the selected task
+    api.delete(`/api/tasks/delete/${taskID}`)
+      .then(response => {
+        taskUpdate(selectedPerson)
+      })
   }
 
   // TODO: Look into datagrid instead of table
@@ -168,7 +180,7 @@ function TaskTable({ rows, projects, taskUpdate }) {
 
         {/* Generate the buttons to act as actions on the dialog popup */}
         <DialogActions>
-          <Button onClick={handleClose} color="error">Delete Task</Button>
+          <Button onClick={handleDelete} color="error">Delete Task</Button>
           <Button onClick={handleClose}>Cancel</Button>
           <Button onClick={handleSubmit}>Confirm</Button>
         </DialogActions>
