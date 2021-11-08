@@ -8,7 +8,7 @@ const db = new sqlite3.Database('./data.db')
 function getAllTasks(req, res, next) {
 
     // Define the query to be run
-    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Project.Title AS ProjectTitle
+    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle
                FROM Task JOIN Project
                ON Project.ProjectID = Task.ProjectID`
 
@@ -34,7 +34,7 @@ function getPersonsTasks(req, res, next) {
 
     // TODO: Write this query to only pull tasks for the certain user
     // Define the query to be run
-    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Project.Title AS ProjectTitle
+    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle
                 FROM Task JOIN Completes JOIN Person JOIN Project
                     ON Task.TaskID = Completes.TaskID
                     AND Completes.PersonID = Person.PersonID
@@ -58,9 +58,8 @@ function getPersonsTasks(req, res, next) {
 function addTask(req, res, next) {
     const newObject = req.body
 
-    console.log(newObject);
-
     var statement = db.prepare("INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES (?, ?, ?, ?, ?)")
+    // TODO: Consider updating this so the frontend handles date conversion
     statement.run(newObject.title, newObject.completion, (new Date(newObject.dueDate).getTime() / 1000), (new Date(newObject.creationDate).getTime() / 1000), newObject.projectID, function (error, result) {
         console.log(this.lastID)
         const newTaskID = this.lastID
@@ -72,6 +71,19 @@ function addTask(req, res, next) {
             assignStatement.finalize()
         }
     })
+
+    statement.finalize()
+
+    res.send("Success")
+}
+
+function updateTask(req, res, next) {
+    const updatedObject = req.body
+
+    var statement = db.prepare(`UPDATE Task 
+                                SET Completion = ?, DueDate = ?, ProjectID = ?, Title = ? 
+                                WHERE TaskID = ?`)
+    statement.run(updatedObject.completion, updatedObject.dueDate, updatedObject.projectID, updatedObject.title, updatedObject.taskID)
 
     statement.finalize()
 
@@ -143,4 +155,4 @@ function getProjectTasks(req, res, next) {
     })
 }
 
-module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, addTask }
+module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, addTask, updateTask }

@@ -25,41 +25,143 @@ import DesktopDatePicker from '@mui/lab/DesktopDatePicker';
 
 const dateFormatOptions = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }
 
-function TaskTable({ rows }) {
+function TaskTable({ rows, projects, taskUpdate }) {
+
+  const selectedPerson = useStore(state => state.selectedPerson)
+
+  const [isModifyDialogOpen, setIsModifyDialogOpen] = useState(false)
+  const [selectedTask, setSelectedTask] = useState({})
+
+  const [updateComplete, setUpdateComplete] = useState(false)
+  const [updateTitle, setUpdateTitle] = useState("")
+  const [updateDueDate, setUpdateDueDate] = useState(new Date())
+  const [updateProject, setUpdateProject] = useState(-1)
+
+  const [creationDate, setCreationDate] = useState(new Date())
+  const [taskID, setTaskID] = useState(-1)
+
+  const handleRowClick = (event, task) => {
+    console.log(task)
+    setSelectedTask(task)
+    setUpdateComplete(Boolean(task.Completion))
+    setUpdateTitle(task.Title)
+    setUpdateDueDate(new Date(task.DueDate * 1000))
+    setUpdateProject(task.ProjectID)
+    setIsModifyDialogOpen(true)
+    setCreationDate(task.CreationDate)
+    setTaskID(task.TaskID)
+  }
+
+  const handleUpdateCompleteChange = (event) => {
+    setUpdateComplete(event.target.checked)
+  }
+
+  const handleUpdateTitleChange = (event) => {
+    setUpdateTitle(event.target.value)
+  }
+
+  const handleUpdateDateChange = (newDate) => {
+    setUpdateDueDate(newDate)
+  }
+
+  const handleUpdateProjectChange = (event) => {
+    setUpdateProject(event.target.value)
+  }
+
+  const handleClose = () => {
+    setIsModifyDialogOpen(false)
+  }
+
+  const handleSubmit = () => {
+    setIsModifyDialogOpen(false)
+
+    // TODO: Consider only passing information that was actually modified
+    const updatedTask = {
+      title: updateTitle,
+      completion: updateComplete,
+      dueDate: updateDueDate.getTime() / 1000,
+      projectID: updateProject,
+      creationDate: creationDate,
+      taskID: taskID
+    }
+
+    console.log(updatedTask);
+
+    // TODO: Check for an error response here
+    api.put(`/api/tasks/${updatedTask.taskID}`, updatedTask)
+    .then(response => {
+      console.log(response);
+      taskUpdate(selectedPerson)
+    })
+  }
 
   // TODO: Look into datagrid instead of table
   // TODO: Add spinner/message when rows is empty array
   return (
-    <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="User's Tasks">
-        <TableHead>
-          <TableRow>
-            <TableCell></TableCell>
-            <TableCell>Title</TableCell>
-            <TableCell align="right">Project</TableCell>
-            <TableCell align="right">Due</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow
-              key={row.TaskID}
-              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-            >
-              <TableCell padding="checkbox">
-                <Tooltip title="Mark Complete">
-                  <Checkbox color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />}/>
-                </Tooltip>
-              </TableCell>
-              <TableCell>{row.Title}</TableCell>
-              {/* TODO: Handle projectID's of -1 */}
-              <TableCell align="right" size="small">{row.ProjectTitle}</TableCell>
-              <TableCell align="right" size="small">{new Date(row.DueDate * 1000).toLocaleDateString("en-US", dateFormatOptions)}</TableCell>
+    <>
+      <TableContainer component={Paper}>
+        <Table sx={{ minWidth: 650 }} aria-label="User's Tasks">
+          <TableHead>
+            <TableRow>
+              <TableCell></TableCell>
+              <TableCell>Title</TableCell>
+              <TableCell align="right">Project</TableCell>
+              <TableCell align="right">Due</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {rows.map((row) => (
+              <TableRow
+                key={row.TaskID}
+                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                onClick={(event) => handleRowClick(event, row)}
+                hover
+              >
+                <TableCell padding="checkbox">
+                  <Tooltip title="Mark Complete">
+                    {/* TODO: Supress opening of dialog on click of this */}
+                    <Checkbox color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} value={row.Completion}/>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>{row.Title}</TableCell>
+                {/* TODO: Handle projectID's of -1 */}
+                <TableCell align="right" size="small">{row.ProjectTitle}</TableCell>
+                <TableCell align="right" size="small">{new Date(row.DueDate * 1000).toLocaleDateString("en-US", dateFormatOptions)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* The popup dialog for editing and deleting tasks */}
+      <Dialog open={isModifyDialogOpen} onClose={handleClose}>
+        <DialogTitle>Modify task "{selectedTask.Title}"</DialogTitle>
+        <DialogContent>
+          <Tooltip title="Mark Complete">
+            <Checkbox color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} checked={updateComplete} onChange={handleUpdateCompleteChange}/>
+          </Tooltip>
+          {/* TODO: Limit how long these strings are so they don't break the database */}
+          <TextField autoFocus id="Title" label="Title" type="text" fullWidth variant="outlined" margin="normal" onChange={handleUpdateTitleChange} value={updateTitle}/>
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DesktopDatePicker label="Due Date" inputFormat="MM/dd/yyyy" renderInput={(params) => <TextField margin="normal" {...params}/>} onChange={handleUpdateDateChange} value={updateDueDate}/>
+          </LocalizationProvider>
+          <FormControl sx={{ m: 2, minWidth: 120 }}>
+            <InputLabel id='project-select'>Project</InputLabel>
+            <Select labelId="project-select-label" id="project-select" label="Project" value={updateProject} onChange={handleUpdateProjectChange}>
+              <MenuItem value={-1}>None</MenuItem>
+              {projects.map((row) => (
+                <MenuItem key={row.ProjectID} value={row.ProjectID}>{row.Title}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="error">Delete Task</Button>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleSubmit}>Confirm</Button>
+        </DialogActions>
+      </Dialog>
+    </>
   )
 }
 
@@ -99,7 +201,6 @@ export function UserTasks() {
 
   const handleNewDateChange = (newDate) => {
     setNewTaskDate(newDate)
-    console.log(newTaskDate);
   }
 
   const handleProjectSelectChange = (event) => {
@@ -110,7 +211,6 @@ export function UserTasks() {
   const handleSubmit = (title, date, project) => {
     setIsDialogOpen(false)
 
-    // TODO: Assign this new task to the selected person
     const newTask = {
       title: title,
       completion: false,
@@ -122,6 +222,7 @@ export function UserTasks() {
 
     console.log(newTask);
 
+    // TODO: Check for an error response here
     api.post(`/api/tasks`, newTask)
       .then(response => {
         console.log(response);
@@ -190,8 +291,8 @@ export function UserTasks() {
           </IconButton>
         </Tooltip>
       </Bar>
-      {/* TODO: Update tasks right away to that array only holds the data I need */}
-      <TaskTable rows={tasks} />
+      {/* TODO: Update tasks right away to that array only holds the data I need rather than having to drill to .data.rows later on*/}
+      <TaskTable rows={tasks} projects={projects} taskUpdate={updateTasks}/>
       <Dialog open={isDialogOpen} onClose={handleClose}>
         <DialogTitle>Add a New Task</DialogTitle>
         <DialogContent>
