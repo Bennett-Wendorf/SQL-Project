@@ -26,13 +26,13 @@ function getAllTasks(req, res, next) {
     })
 }
 
+// Return all tasks assigned to the specified person. This person should be passed to the request as a parameter called id
 function getPersonsTasks(req, res, next) {
 
     if(req.params.id == -1){
         return getAllTasks(req, res, next)
     }
 
-    // TODO: Write this query to only pull tasks for the certain user
     // Define the query to be run
     let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle
                 FROM Task JOIN Completes JOIN Person JOIN Project
@@ -55,31 +55,42 @@ function getPersonsTasks(req, res, next) {
     })
 }
 
+// Add a new task to the database
 function addTask(req, res, next) {
     const newObject = req.body
 
+    // Prepare the sql statement to be run.
     var statement = db.prepare("INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES (?, ?, ?, ?, ?)")
+
+    // Run the statement with the given parameters and define a callback to fun on completion
     // TODO: Consider updating this so the frontend handles date conversion
     statement.run(newObject.title, newObject.completion, (new Date(newObject.dueDate).getTime() / 1000), (new Date(newObject.creationDate).getTime() / 1000), newObject.projectID, function (error, result) {
-        console.log(this.lastID)
+        // This callback function will assign the newly created task to the correct person, if needed
+        
+        // Grab the id of the task that was just created. // TODO: Make sure this pulls what I think it does
         const newTaskID = this.lastID
 
+        // If the newTaskID is defined and the assignee of the new task is not -1, then run another sql statement to add the assignment tuple to the Completes table
         if(newTaskID && newObject.assignee != -1){
             var assignStatement = db.prepare("INSERT INTO Completes (DateAssigned, TaskID, PersonID) VALUES (?, ?, ?)")
             assignStatement.run((new Date().getTime() / 1000), newTaskID, newObject.assignee)
-
             assignStatement.finalize()
         }
     })
 
     statement.finalize()
 
+    // Return a success statement
+    // TODO: Figure out how to return a failure statement here if the queries failed
     res.send("Success")
 }
 
+// Update the passed task object in the database
 function updateTask(req, res, next) {
+    // The object to update
     const updatedObject = req.body
 
+    // Prep the sql statement and run it with the specified parameters
     var statement = db.prepare(`UPDATE Task 
                                 SET Completion = ?, DueDate = ?, ProjectID = ?, Title = ? 
                                 WHERE TaskID = ?`)
@@ -87,9 +98,12 @@ function updateTask(req, res, next) {
 
     statement.finalize()
 
+    // Return a success statement
+    // TODO: Figure out how to return a failure statement here if the queries failed
     res.send("Success")
 }
 
+// Return all people from the database
 function getPeople(req, res, next) {
 
     // Define the query to be fun
@@ -110,6 +124,7 @@ function getPeople(req, res, next) {
     })
 }
 
+// Return all projects from the database
 function getProjects(req, res, next) {
 
     // Define the query to be fun
@@ -130,10 +145,11 @@ function getProjects(req, res, next) {
     })
 }
 
+// Return all tasks that are a part of the specified project
 function getProjectTasks(req, res, next) {
 
-    // TODO: Write this query to only pull tasks for the certain user
     // Define the query to be run
+    // TODO: Write this query to only pull tasks for the certain project
     let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Project.Title AS ProjectTitle
                 FROM Task JOIN Completes JOIN Person JOIN Project
                     ON Task.TaskID = Completes.TaskID
@@ -155,4 +171,5 @@ function getProjectTasks(req, res, next) {
     })
 }
 
+// Export all functions to be imported elsewhere
 module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, addTask, updateTask }

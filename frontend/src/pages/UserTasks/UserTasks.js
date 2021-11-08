@@ -1,37 +1,44 @@
 // Import React stuff
 import React, { useState, useEffect } from "react";
 
-// Import css and api
-import "./UserTasks.css";
-
+// Import utilites and components
 import api from "../../utils/api";
 import useStore from "../../utils/stores"
 import Bar from "../../components/Bar/Bar";
-import { Button, IconButton, Tooltip } from "@mui/material";
+
+// Import icons from mui
 import AddIcon from '@mui/icons-material/AddCircle';
 import FilterIcon from '@mui/icons-material/FilterAlt';
 import SortIcon from '@mui/icons-material/Sort';
 import CheckIcon from '@mui/icons-material/CheckCircleOutline';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox } from "@mui/material";
+// Import general mui stuff
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Button, IconButton, Tooltip } from "@mui/material";
 
+// Import dialog stuff from mui
 import { TextField, Dialog, DialogActions, DialogContent, DialogTitle, Select, MenuItem } from "@mui/material";
 import { FormControl, InputLabel } from "@mui/material";
 
+// Import date picker and localization
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DesktopDatePicker from '@mui/lab/DesktopDatePicker';
 
+// Setup a general format for dates
 const dateFormatOptions = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }
 
+// Create a component for the table of tasks
 function TaskTable({ rows, projects, taskUpdate }) {
 
+  // Grab the selected person piece of state so it can later be passed to the taskUpdate function
   const selectedPerson = useStore(state => state.selectedPerson)
 
+  // Create relevant pieces of state for the dialog popup
   const [isModifyDialogOpen, setIsModifyDialogOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState({})
 
+  // Create pieces of state for handling task updates
   const [updateComplete, setUpdateComplete] = useState(false)
   const [updateTitle, setUpdateTitle] = useState("")
   const [updateDueDate, setUpdateDueDate] = useState(new Date())
@@ -40,8 +47,8 @@ function TaskTable({ rows, projects, taskUpdate }) {
   const [creationDate, setCreationDate] = useState(new Date())
   const [taskID, setTaskID] = useState(-1)
 
+  // Handle when a row is clicked and set up the pieces of state 
   const handleRowClick = (event, task) => {
-    console.log(task)
     setSelectedTask(task)
     setUpdateComplete(Boolean(task.Completion))
     setUpdateTitle(task.Title)
@@ -52,18 +59,16 @@ function TaskTable({ rows, projects, taskUpdate }) {
     setTaskID(task.TaskID)
   }
 
+  // Functions to handle changes in values for modification dialog
   const handleUpdateCompleteChange = (event) => {
     setUpdateComplete(event.target.checked)
   }
-
   const handleUpdateTitleChange = (event) => {
     setUpdateTitle(event.target.value)
   }
-
   const handleUpdateDateChange = (newDate) => {
     setUpdateDueDate(newDate)
   }
-
   const handleUpdateProjectChange = (event) => {
     setUpdateProject(event.target.value)
   }
@@ -72,9 +77,11 @@ function TaskTable({ rows, projects, taskUpdate }) {
     setIsModifyDialogOpen(false)
   }
 
+  // Handle database update on submission of the dialog
   const handleSubmit = () => {
     setIsModifyDialogOpen(false)
 
+    // Create the new updated task object
     // TODO: Consider only passing information that was actually modified
     const updatedTask = {
       title: updateTitle,
@@ -85,12 +92,10 @@ function TaskTable({ rows, projects, taskUpdate }) {
       taskID: taskID
     }
 
-    console.log(updatedTask);
-
+    // Make a call to the backend api to update the task
     // TODO: Check for an error response here
     api.put(`/api/tasks/${updatedTask.taskID}`, updatedTask)
     .then(response => {
-      console.log(response);
       taskUpdate(selectedPerson)
     })
   }
@@ -99,8 +104,11 @@ function TaskTable({ rows, projects, taskUpdate }) {
   // TODO: Add spinner/message when rows is empty array
   return (
     <>
+      {/* Build the task table */}
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="User's Tasks">
+
+          {/* Generate the headers of the rows */}
           <TableHead>
             <TableRow>
               <TableCell></TableCell>
@@ -110,6 +118,7 @@ function TaskTable({ rows, projects, taskUpdate }) {
             </TableRow>
           </TableHead>
           <TableBody>
+            {/* Map each task from the backend to a row in the table */}
             {rows.map((row) => (
               <TableRow
                 key={row.TaskID}
@@ -138,6 +147,7 @@ function TaskTable({ rows, projects, taskUpdate }) {
         <DialogTitle>Modify task "{selectedTask.Title}"</DialogTitle>
         <DialogContent>
           <Tooltip title="Mark Complete">
+            {/* TODO: Make it more obvious what this does */}
             <Checkbox color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} checked={updateComplete} onChange={handleUpdateCompleteChange}/>
           </Tooltip>
           {/* TODO: Limit how long these strings are so they don't break the database */}
@@ -155,6 +165,8 @@ function TaskTable({ rows, projects, taskUpdate }) {
             </Select>
           </FormControl>
         </DialogContent>
+
+        {/* Generate the buttons to act as actions on the dialog popup */}
         <DialogActions>
           <Button onClick={handleClose} color="error">Delete Task</Button>
           <Button onClick={handleClose}>Cancel</Button>
@@ -165,9 +177,10 @@ function TaskTable({ rows, projects, taskUpdate }) {
   )
 }
 
-// Define this component
+// Create a component for the UserTasks page
 export function UserTasks() {
 
+  // Define default values for new tasks
   const defaultNewProjectID = -1
   const defaultNewTitle = ""
   const defaultNewDate = new Date()
@@ -181,10 +194,10 @@ export function UserTasks() {
   const [newTaskDate, setNewTaskDate] = useState(defaultNewDate) // This will default to today
   const selectedPerson = useStore(state => state.selectedPerson)
 
+  // Handle opening and closing of the dialog for new tasks
   const handleClickOpen = () => {
     setIsDialogOpen(true)
   }
-
   const handleClose = () => {
     setIsDialogOpen(false)
     updateTasks(selectedPerson)
@@ -195,14 +208,13 @@ export function UserTasks() {
     setNewTaskDate(defaultNewDate)
   }
 
+  // Handle state changes for the new task dialog
   const handleNewTitleChange = (event) => {
     setNewTaskTitle(event.target.value)
   }
-
   const handleNewDateChange = (newDate) => {
     setNewTaskDate(newDate)
   }
-
   const handleProjectSelectChange = (event) => {
     setNewTaskProject(event.target.value)
   }
@@ -211,6 +223,7 @@ export function UserTasks() {
   const handleSubmit = (title, date, project) => {
     setIsDialogOpen(false)
 
+    // Generate an object with the information for the new task
     const newTask = {
       title: title,
       completion: false,
@@ -220,12 +233,10 @@ export function UserTasks() {
       assignee: selectedPerson.personID
     }
 
-    console.log(newTask);
-
+    // Send a request to the backend to create a new task
     // TODO: Check for an error response here
     api.post(`/api/tasks`, newTask)
       .then(response => {
-        console.log(response);
         updateTasks(selectedPerson)
       })
     
@@ -248,6 +259,7 @@ export function UserTasks() {
     .catch(err => console.log(err))
   }
 
+  // Make a call to the backend to update the list of projeccts
   // TODO: Call this incrementally
   const updateProjects = () => {
     api.get(`/api/projects`)
@@ -271,9 +283,10 @@ export function UserTasks() {
     }
   }, [])
 
-  // Return some JSX definine 3 labels with task data from the api call
+  // Build the User Tasks page
   return (
     <div>
+      {/* Define the bar for the top of the screen, with its buttons */}
       <Bar title="User Tasks">
         <Tooltip title="Add" justify="left">
           <IconButton aria-label="add" size="large" onClick={handleClickOpen}>
@@ -291,8 +304,12 @@ export function UserTasks() {
           </IconButton>
         </Tooltip>
       </Bar>
+
+      {/* Include the TaskTable component here. This component is defined above */}
       {/* TODO: Update tasks right away to that array only holds the data I need rather than having to drill to .data.rows later on*/}
       <TaskTable rows={tasks} projects={projects} taskUpdate={updateTasks}/>
+
+      {/* Create the dialog box that will pop up when the Add button is pressed. This will add a new task to the database */}
       <Dialog open={isDialogOpen} onClose={handleClose}>
         <DialogTitle>Add a New Task</DialogTitle>
         <DialogContent>
