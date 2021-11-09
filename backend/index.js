@@ -16,6 +16,7 @@ app.get('/api/tasks', getAllTasks)
 app.get(`/api/tasks/person/:id`, getPersonsTasks)
 app.get('/api/people', getPeople)
 app.get('/api/tasks/project/:id', getProjectTasks)
+app.get('/api/tasks/projects', getAllProjects)
 
 // Error handlers
 app.use((req, res) => res.status(404).send("404 NOT FOUND"))
