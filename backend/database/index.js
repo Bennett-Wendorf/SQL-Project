@@ -8,8 +8,9 @@ const db = new sqlite3.Database('./data.db')
 function getAllTasks(req, res, next) {
 
     // Define the query to be run
+    // TODO: Switch this to a left join so that tasks without projects are not left out
     let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle
-               FROM Task JOIN Project
+               FROM Task LEFT JOIN Project
                ON Project.ProjectID = Task.ProjectID`
 
     // Run the above query and then call the callback function given the full set of rows
@@ -90,11 +91,31 @@ function updateTask(req, res, next) {
     // The object to update
     const updatedObject = req.body
 
+    console.log(updatedObject)
+
     // Prep the sql statement and run it with the specified parameters
+    // TODO: Rebuild this to be able to handle only receiving the information that needs to change
     var statement = db.prepare(`UPDATE Task 
-                                SET Completion = ?, DueDate = ?, ProjectID = ?, Title = ? 
+                                SET Completion = ?, DueDate = ?, ProjectID = ?, Title = ?
                                 WHERE TaskID = ?`)
     statement.run(updatedObject.completion, updatedObject.dueDate, updatedObject.projectID, updatedObject.title, updatedObject.taskID)
+
+    statement.finalize()
+
+    // Return a success statement
+    // TODO: Figure out how to return a failure statement here if the queries failed
+    res.send("Success")
+}
+
+// Mark the task as complete
+// TODO: Integrate this into the updateTask function
+function markCompleted(req, res) {
+    const updatedObject = req.body
+
+    var statement = db.prepare(`UPDATE Task
+                                SET Completion = ?
+                                WHERE TaskID = ?`)
+    statement.run(updatedObject.completion, req.params.id)
 
     statement.finalize()
 
@@ -185,4 +206,4 @@ function getProjectTasks(req, res, next) {
 }
 
 // Export all functions to be imported elsewhere
-module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, addTask, updateTask, deleteTask }
+module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, addTask, updateTask, deleteTask, markCompleted }

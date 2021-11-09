@@ -112,6 +112,23 @@ function TaskTable({ rows, projects, taskUpdate }) {
       })
   }
 
+  const handleCompletion = (event) => {
+    // Suppress opening of the dialog box when the checkbox is clicked
+    // TODO: Consider a better way to do this
+    setIsModifyDialogOpen(false)
+    console.log(event.target.id)
+
+    const updatedTask = {
+      completion: event.target.checked,
+      taskID: parseInt(event.target.id)
+    }
+
+    api.put(`/api/task/complete/${taskID}`, updatedTask)
+      .then(response => {
+        taskUpdate(selectedPerson)
+      })
+  }
+
   // TODO: Look into datagrid instead of table
   // TODO: Add spinner/message when rows is empty array
   return (
@@ -139,14 +156,13 @@ function TaskTable({ rows, projects, taskUpdate }) {
                 hover
               >
                 <TableCell padding="checkbox">
-                  <Tooltip title="Mark Complete">
-                    {/* TODO: Supress opening of dialog on click of this */}
-                    <Checkbox color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} value={row.Completion}/>
+                  <Tooltip title={Boolean(row.Completion) ? "Mark Incomplete" : "Mark Complete"}>
+                    {/* TODO: Try to use a custom attribute here instead of id */}
+                    <Checkbox id={row.TaskID} color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} checked={Boolean(row.Completion)} onChange={handleCompletion}/>
                   </Tooltip>
                 </TableCell>
                 <TableCell>{row.Title}</TableCell>
-                {/* TODO: Handle projectID's of -1 */}
-                <TableCell align="right" size="small">{row.ProjectTitle}</TableCell>
+                <TableCell align="right" size="small">{row.ProjectID === -1 ? "None" : row.ProjectTitle}</TableCell>
                 <TableCell align="right" size="small">{new Date(row.DueDate * 1000).toLocaleDateString("en-US", dateFormatOptions)}</TableCell>
               </TableRow>
             ))}
@@ -158,7 +174,7 @@ function TaskTable({ rows, projects, taskUpdate }) {
       <Dialog open={isModifyDialogOpen} onClose={handleClose}>
         <DialogTitle>Modify task "{selectedTask.Title}"</DialogTitle>
         <DialogContent>
-          <Tooltip title="Mark Complete">
+          <Tooltip title={updateComplete ? "Mark Incomplete" : "Mark Complete"}>
             {/* TODO: Make it more obvious what this does */}
             <Checkbox color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} checked={updateComplete} onChange={handleUpdateCompleteChange}/>
           </Tooltip>
