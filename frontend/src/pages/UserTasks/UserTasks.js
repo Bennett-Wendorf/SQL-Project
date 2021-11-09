@@ -116,14 +116,13 @@ function TaskTable({ rows, projects, taskUpdate }) {
     // Suppress opening of the dialog box when the checkbox is clicked
     // TODO: Consider a better way to do this
     setIsModifyDialogOpen(false)
-    console.log(event.target.id)
 
     const updatedTask = {
       completion: event.target.checked,
       taskID: parseInt(event.target.id)
     }
 
-    api.put(`/api/task/complete/${taskID}`, updatedTask)
+    api.put(`/api/task/complete/${updatedTask.taskID}`, updatedTask)
       .then(response => {
         taskUpdate(selectedPerson)
       })
@@ -158,7 +157,7 @@ function TaskTable({ rows, projects, taskUpdate }) {
                 <TableCell padding="checkbox">
                   <Tooltip title={Boolean(row.Completion) ? "Mark Incomplete" : "Mark Complete"}>
                     {/* TODO: Try to use a custom attribute here instead of id */}
-                    <Checkbox id={row.TaskID} color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} checked={Boolean(row.Completion)} onChange={handleCompletion}/>
+                    <Checkbox id={row.TaskID.toString()} testattr="Hello" color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} checked={Boolean(row.Completion)} onChange={handleCompletion}/>
                   </Tooltip>
                 </TableCell>
                 <TableCell>{row.Title}</TableCell>
