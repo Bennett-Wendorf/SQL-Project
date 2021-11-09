@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const options = {cors: {origin: "*",},};
-const { getAllTasks, getPersonsTasks, getPeople, getProjectTasks } = require('./database')
+const { getAllTasks, getPersonsTasks, getPeople, getProjectTasks, getAllProjects } = require('./database')
 
 // Define the port to run the backend on as the enviroment variable for port, or 3500 if that variable is not defined
 const PORT = process.env.PORT || 3500;
@@ -16,7 +16,7 @@ app.get('/api/tasks', getAllTasks)
 app.get(`/api/tasks/person/:id`, getPersonsTasks)
 app.get('/api/people', getPeople)
 app.get('/api/tasks/project/:id', getProjectTasks)
-app.get('/api/tasks/projects', getAllProjects)
+app.get('/api/projects', getAllProjects)
 
 // Error handlers
 app.use((req, res) => res.status(404).send("404 NOT FOUND"))

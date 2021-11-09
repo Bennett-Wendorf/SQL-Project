@@ -101,7 +101,7 @@ function getProjectTasks(req, res, next) {
 function getAllProjects(req, res, next) {
 
     // Query returns a list of all project that still have tasks remaing
-    let sql = `SELECT Project.Title AS ProjectTitle, DueDate, count(TaskID) as TaskCount
+    let sql = `SELECT Project.Title AS ProjectTitle, Project.DueDate, count(TaskID) as TaskCount
                   FROM Project JOIN Task
                     ON Project.ProjectID = Task.ProjectID
                   GROUP BY Project.Title
