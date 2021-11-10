@@ -1,6 +1,8 @@
+// Import React stuff
 import React, { useState, useEffect } from "react";
 import { Link, withRouter } from "react-router-dom";
-import "./NavDrawer.css";
+
+// Import utilities
 import logo from "../../res/logo.ico";
 import api from "../../utils/api";
 import useStore from "../../utils/stores"
@@ -20,6 +22,7 @@ import ManageIcon from "@mui/icons-material/Settings";
 import PersonIcon from "@mui/icons-material/Person";
 import { IconButton } from "@mui/material";
 
+// Import menu components for the person selection
 import {Menu, MenuItem} from "@mui/material"
 
 // Define what we want the width of the drawer to be
@@ -80,16 +83,20 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+// Create the PersonMenu component to allow the user to select whos tasks they want to be able to view
 function PersonMenu(){
 
+  // Pieces of state for menu handling
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const menuOpen = Boolean(menuAnchorEl)
+
+  // Piece of state to handle list of people
   const [people, setPeople] = useState([])
 
-  // TODO: Make this piece of state global
-  // const [selectedPerson, setSelectedPerson] = useState(null)
+  // Get the function to set the global store for selected person
   const setSelectedPerson = useStore(state => state.setSelectedPerson)
 
+  // The first time this component renders, make the call to the backend to get the list of people
   // TODO: Call this incrementally
   useEffect(() => api.get('/api/people')
     .then(response => { 
@@ -98,28 +105,32 @@ function PersonMenu(){
     })
     .catch(err => console.log(err)), [])
 
+  // Handle menu opening and closing by setting the menu anchor
   const openMenu = (event) => {
     setMenuAnchorEl(event.currentTarget)
   }
-
   const handleMenuClose = () => {
     setMenuAnchorEl(null)
   }
 
+  // Handle setting a new selected person
   const setPerson = (personID, personName) => {
     setMenuAnchorEl(null)
-    // console.log("From setPerson in NavDrawer, personID: " + personID);
-    // console.log("From setPerson in NavDrawer, personName: " + personName);
     setSelectedPerson({ 'personID': personID, 'personName': personName })
   }
 
   return (
     <>
+      {/* Create the button to open the menu */}
       <IconButton aria-label="Person" size="large" onClick={openMenu}>
         <PersonIcon />
       </IconButton>
-      {/* Add a way to display which user is currently selected */}
+
+      {/* Create the menu for selecting the user */}
       <Menu anchorEl={menuAnchorEl} open={menuOpen} onClose={handleMenuClose} MenuListProps={{ 'aria-labelledby': 'basic-button', }}>
+        {/* Create a menu item that always exists for going back to viewing all tasks in the database */}
+        <MenuItem key={-1} onClick={() => setPerson(-1, "All Tasks")}>All Tasks</MenuItem>
+        {/* Map the list of people to menu items */}
         {people.map((row) => (
             <MenuItem key={row.PersonID} onClick={() => setPerson(row.PersonID, row.FirstName + " " + row.LastName)}>{row.FirstName + " " + row.LastName}</MenuItem>
           ))}
@@ -128,10 +139,12 @@ function PersonMenu(){
   )
 }
 
-function NavDrawer(props) {
+// Create the NavDrawer(sidebar) component
+function NavDrawer() {
   const classes = useStyles();
 
-  const { selectedPerson } = useStore()
+  // Grab the piece of state for the selected person
+  const selectedPerson = useStore(state => state.selectedPerson)
 
   // Build the actual JSX to build the nav drawer
   return (
@@ -145,12 +158,14 @@ function NavDrawer(props) {
         }}
         anchor="left"
       >
+        {/* Generate the title and logo section and add a divider below it */}
         <div className={classes.logo}>
           <img className={classes.logoImg} alt={"logo"} src={logo} />
           <h3>Task Organizer</h3>
         </div>
         <Divider />
 
+        {/* Create the list of buttons for each page and have them link to the proper endpoints */}
         <List>
           <Link to="/project" className={classes.link}>
             <ListItem button key="Project">
@@ -174,6 +189,8 @@ function NavDrawer(props) {
           </Link>
 
         </List>
+
+        {/* Create the bottom section for user selection */}
         <div className={classes.bottomPush}>
           <div className={classes.bottomPushItems}>
             {PersonMenu()}

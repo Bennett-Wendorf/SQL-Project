@@ -1,6 +1,6 @@
+// React stuff
 import React from "react";
 import Children from 'react-children-utilities';
-import "./Bar.css";
 
 // MUI components
 import { makeStyles } from "@mui/styles";
@@ -41,12 +41,15 @@ const useStyles = makeStyles((theme) => ({
     },
   }));
 
+// Create the bar component to be used on every page
 function Bar(props) {
     const classes = useStyles();
 
+    // Filter out children with proper justification
     const leftChildren = Children.filter(props.children, (child) => child.props.justify === "left")
     const rightChildren = Children.filter(props.children, (child) => child.props.justify === "right")
 
+    // Return the JSX necessary to create the bar, with leftChildren to the left of the title and rightChildren to the right
     return (
       <Box className={classes.root} sx={{ flexGrow: 1 }}>
         <CssBaseline />

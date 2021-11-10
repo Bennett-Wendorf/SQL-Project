@@ -1,9 +1,9 @@
 import React from "react";
-import "./Project.css";
 import Button from '@mui/material/Button';
 import Bar from "../../components/Bar/Bar"; 
 import DropDownIcon from '@mui/icons-material/ArrowDropDownCircle';
 
+// Create the Project page component
 export function Project() {
 
   // For now, return a button to show on this component. // TODO: Change this to more useful content

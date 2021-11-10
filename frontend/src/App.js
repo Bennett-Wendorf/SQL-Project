@@ -41,6 +41,8 @@ function App() {
         <NavDrawer />
         <div className={classes.content}>
           <div className={classes.toolbar} />
+
+          {/* Create the routes to render certain pages at certain endpoints */}
           <Switch>
             <Redirect exact from="/" to="project" />
             <Route path="/manage">
