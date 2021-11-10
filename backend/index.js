@@ -37,6 +37,7 @@ app.get('/api/projects', getProjects)
 
 // Get all tasks part of the project with the specified id
 app.get('/api/tasks/project/:id', getProjectTasks)
+app.get('/api/projects', getAllProjects)
 
 // Error handlers
 app.use((req, res) => res.status(404).send("404 NOT FOUND"))

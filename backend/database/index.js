@@ -182,14 +182,11 @@ function getProjects(req, res, next) {
 // Return all tasks that are a part of the specified project
 function getProjectTasks(req, res, next) {
 
+    // TODO: Write this query to only pull tasks for the certain projects
     // Define the query to be run
-    // TODO: Write this query to only pull tasks for the certain project
-    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Project.Title AS ProjectTitle
-                FROM Task JOIN Completes JOIN Person JOIN Project
-                    ON Task.TaskID = Completes.TaskID
-                    AND Completes.PersonID = Person.PersonID
-                    AND Project.ProjectID = Task.ProjectID
-                WHERE Person.PersonID = ${req.params.id}`
+    let sql = `SELECT Task.Completion, Task.Title, Task.CreationDate, Task.DueDate
+                  FROM Task
+                  WHERE Task.ProjectID = ${req.params.id}`
 
     // Run the above query then call the callback given the full set of rows
     db.all(sql, [], (err, rows) => {
@@ -205,5 +202,28 @@ function getProjectTasks(req, res, next) {
     })
 }
 
-// Export all functions to be imported elsewhere
-module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, addTask, updateTask, deleteTask, markCompleted }
+// Return a json object containing all projects in the project table
+function getAllProjects(req, res, next) {
+
+    // Query returns a list of all project that still have tasks remaing
+    let sql = `SELECT Project.Title AS ProjectTitle, Project.DueDate, count(TaskID) as TaskCount
+                  FROM Project JOIN Task
+                    ON Project.ProjectID = Task.ProjectID
+                  GROUP BY Project.Title
+                  HAVING Task.Completion = 0`
+
+    // Run the above query and then call the callback function given the full set of rows
+    db.all(sql, [], (err, rows) => {
+        if(err) {
+            res.status(400).json({"error":err.message})
+            return
+        }
+
+        // Set the response to this api call as the data from the database
+        res.json({
+            rows
+        })
+    })
+}
+
+module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjectTasks, getAllProjects }
