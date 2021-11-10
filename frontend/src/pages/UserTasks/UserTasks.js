@@ -148,6 +148,7 @@ function TaskTable({ rows, projects, taskUpdate }) {
           <TableBody>
             {/* Map each task from the backend to a row in the table */}
             {rows.map((row) => (
+              // Handle mouse pointer on hover
               <TableRow
                 key={row.TaskID}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -156,7 +157,7 @@ function TaskTable({ rows, projects, taskUpdate }) {
               >
                 <TableCell padding="checkbox">
                   <Tooltip title={Boolean(row.Completion) ? "Mark Incomplete" : "Mark Complete"}>
-                    {/* TODO: Try to use a custom attribute here instead of id */}
+                    {/* TODO: Try to use a custom attribute here instead of id. Or could pass a param to the handleComplete method */}
                     <Checkbox id={row.TaskID.toString()} testattr="Hello" color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} checked={Boolean(row.Completion)} onChange={handleCompletion}/>
                   </Tooltip>
                 </TableCell>
