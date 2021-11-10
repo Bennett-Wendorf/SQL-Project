@@ -226,4 +226,4 @@ function getAllProjects(req, res, next) {
     })
 }
 
-module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjectTasks, getAllProjects }
+module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, getAllProjects, addTask, updateTask, deleteTask, markCompleted }
