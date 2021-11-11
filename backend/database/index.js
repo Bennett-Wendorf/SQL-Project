@@ -8,7 +8,6 @@ const db = new sqlite3.Database('./data.db')
 function getAllTasks(req, res, next) {
 
     // Define the query to be run
-    // TODO: Switch this to a left join so that tasks without projects are not left out
     let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle
                FROM Task LEFT JOIN Project
                ON Project.ProjectID = Task.ProjectID`
@@ -60,15 +59,16 @@ function getPersonsTasks(req, res, next) {
 function addTask(req, res, next) {
     const newObject = req.body
 
+    console.log(newObject)
+
     // Prepare the sql statement to be run.
     var statement = db.prepare("INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES (?, ?, ?, ?, ?)")
 
     // Run the statement with the given parameters and define a callback to fun on completion
-    // TODO: Consider updating this so the frontend handles date conversion
-    statement.run(newObject.title, newObject.completion, (new Date(newObject.dueDate).getTime() / 1000), (new Date(newObject.creationDate).getTime() / 1000), newObject.projectID, function (error, result) {
+    statement.run(newObject.title, newObject.completion, newObject.dueDate, newObject.creationDate, newObject.projectID, function (error, result) {
         // This callback function will assign the newly created task to the correct person, if needed
         
-        // Grab the id of the task that was just created. // TODO: Make sure this pulls what I think it does
+        // Grab the id of the task that was just created.
         const newTaskID = this.lastID
 
         // If the newTaskID is defined and the assignee of the new task is not -1, then run another sql statement to add the assignment tuple to the Completes table
@@ -182,7 +182,6 @@ function getProjects(req, res, next) {
 // Return all tasks that are a part of the specified project
 function getProjectTasks(req, res, next) {
 
-    // TODO: Write this query to only pull tasks for the certain projects
     // Define the query to be run
     let sql = `SELECT Task.Completion, Task.Title, Task.CreationDate, Task.DueDate
                   FROM Task
@@ -203,9 +202,11 @@ function getProjectTasks(req, res, next) {
 }
 
 // Return a json object containing all projects in the project table
+// TODO: Rename this function or the getProjects function. They have different functionality, but names are too similar
 function getAllProjects(req, res, next) {
 
     // Query returns a list of all project that still have tasks remaing
+    // TODO: Why does this group by Title and not ProjectID?
     let sql = `SELECT Project.Title AS ProjectTitle, Project.DueDate, count(TaskID) as TaskCount
                   FROM Project JOIN Task
                     ON Project.ProjectID = Task.ProjectID

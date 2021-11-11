@@ -14,7 +14,7 @@ import CheckIcon from '@mui/icons-material/CheckCircleOutline';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 
 // Import general mui stuff
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Button, IconButton, Tooltip } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Button, IconButton, Tooltip, Typography } from "@mui/material";
 
 // Import dialog stuff from mui
 import { TextField, Dialog, DialogActions, DialogContent, DialogTitle, Select, MenuItem } from "@mui/material";
@@ -102,6 +102,7 @@ function TaskTable({ rows, projects, taskUpdate }) {
   }
 
   // Handle when the delete button is pressed for a selected task
+  // TODO: Add deletion confirmation
   const handleDelete = () => {
     setIsModifyDialogOpen(false)
 
@@ -112,14 +113,15 @@ function TaskTable({ rows, projects, taskUpdate }) {
       })
   }
 
-  const handleCompletion = (event) => {
+  const handleCompletion = (event, taskToComplete) => {
+
     // Suppress opening of the dialog box when the checkbox is clicked
     // TODO: Consider a better way to do this
     setIsModifyDialogOpen(false)
 
     const updatedTask = {
       completion: event.target.checked,
-      taskID: parseInt(event.target.id)
+      taskID: taskToComplete
     }
 
     api.put(`/api/task/complete/${updatedTask.taskID}`, updatedTask)
@@ -128,7 +130,6 @@ function TaskTable({ rows, projects, taskUpdate }) {
       })
   }
 
-  // TODO: Look into datagrid instead of table
   // TODO: Add spinner/message when rows is empty array
   return (
     <>
@@ -148,17 +149,16 @@ function TaskTable({ rows, projects, taskUpdate }) {
           <TableBody>
             {/* Map each task from the backend to a row in the table */}
             {rows.map((row) => (
-              // Handle mouse pointer on hover
               <TableRow
                 key={row.TaskID}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 onClick={(event) => handleRowClick(event, row)}
                 hover
+                sx={{ cursor: 'pointer' }}
               >
                 <TableCell padding="checkbox">
                   <Tooltip title={Boolean(row.Completion) ? "Mark Incomplete" : "Mark Complete"}>
-                    {/* TODO: Try to use a custom attribute here instead of id. Or could pass a param to the handleComplete method */}
-                    <Checkbox id={row.TaskID.toString()} testattr="Hello" color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} checked={Boolean(row.Completion)} onChange={handleCompletion}/>
+                    <Checkbox testattr="Hello" color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} checked={Boolean(row.Completion)} onChange={(event) => handleCompletion(event, row.TaskID)}/>
                   </Tooltip>
                 </TableCell>
                 <TableCell>{row.Title}</TableCell>
@@ -171,13 +171,15 @@ function TaskTable({ rows, projects, taskUpdate }) {
       </TableContainer>
 
       {/* The popup dialog for editing and deleting tasks */}
+      {/* TODO: Add user assignment here */}
       <Dialog open={isModifyDialogOpen} onClose={handleClose}>
-        <DialogTitle>Modify task "{selectedTask.Title}"</DialogTitle>
-        <DialogContent>
+        <DialogTitle>
           <Tooltip title={updateComplete ? "Mark Incomplete" : "Mark Complete"}>
-            {/* TODO: Make it more obvious what this does */}
-            <Checkbox color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} checked={updateComplete} onChange={handleUpdateCompleteChange}/>
+            <Checkbox color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} checked={updateComplete} onChange={handleUpdateCompleteChange} margin='normal'/>
           </Tooltip>
+          Modify task "{selectedTask.Title}"
+        </DialogTitle>
+        <DialogContent>
           {/* TODO: Limit how long these strings are so they don't break the database */}
           <TextField autoFocus id="Title" label="Title" type="text" fullWidth variant="outlined" margin="normal" onChange={handleUpdateTitleChange} value={updateTitle}/>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -255,8 +257,9 @@ export function UserTasks() {
     const newTask = {
       title: title,
       completion: false,
-      dueDate: date,
-      creationDate: new Date(),
+      // Convert the dates into unix timestamps
+      dueDate: new Date(date).getTime() / 1000,
+      creationDate: new Date().getTime() / 1000,
       projectID: project,
       assignee: selectedPerson.personID
     }
@@ -334,10 +337,10 @@ export function UserTasks() {
       </Bar>
 
       {/* Include the TaskTable component here. This component is defined above */}
-      {/* TODO: Update tasks right away to that array only holds the data I need rather than having to drill to .data.rows later on*/}
       <TaskTable rows={tasks} projects={projects} taskUpdate={updateTasks}/>
 
       {/* Create the dialog box that will pop up when the Add button is pressed. This will add a new task to the database */}
+      {/* TODO: Add user assignment here */}
       <Dialog open={isDialogOpen} onClose={handleClose}>
         <DialogTitle>Add a New Task</DialogTitle>
         <DialogContent>

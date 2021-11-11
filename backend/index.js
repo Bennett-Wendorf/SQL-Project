@@ -20,7 +20,7 @@ app.route('/api/tasks')
 app.put('/api/tasks/:id', updateTask)
 
 // Mark the task completed
-// TODO: This is a bad way of doing this
+// TODO: This is a bad way of doing this (integrate into updateTask)
 app.put('/api/task/complete/:id', markCompleted)
 
 // Delete the task with the specified id
@@ -37,6 +37,8 @@ app.get('/api/projects', getProjects)
 
 // Get all tasks part of the project with the specified id
 app.get('/api/tasks/project/:id', getProjectTasks)
+
+// TODO: Change endpoint for this or the one above. It's not useful to have to things for the same endpoint
 app.get('/api/projects', getAllProjects)
 
 // Error handlers
