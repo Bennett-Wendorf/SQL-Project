@@ -8,9 +8,15 @@ const db = new sqlite3.Database('./data.db')
 function getAllTasks(req, res, next) {
 
     // Define the query to be run
-    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle
-               FROM Task LEFT JOIN Project
-               ON Project.ProjectID = Task.ProjectID`
+    // let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle
+    //            FROM Task LEFT JOIN Project
+    //            ON Project.ProjectID = Task.ProjectID`
+    // TODO: Look into a better way to do this query
+    let sql = `SELECT Tasks.TaskID, Tasks.Title, Tasks.Completion, Tasks.DueDate, Tasks.CreationDate, Tasks.ProjectID, Tasks.ProjectTitle, Completes.PersonID
+                FROM (SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle
+                    FROM Task LEFT JOIN Project 
+                    ON Project.ProjectID = Task.ProjectID) AS Tasks LEFT JOIN Completes
+                ON Completes.TaskID = Tasks.TaskID`
 
     // Run the above query and then call the callback function given the full set of rows
     db.all(sql, [], (err, rows) => {
@@ -34,7 +40,8 @@ function getPersonsTasks(req, res, next) {
     }
 
     // Define the query to be run
-    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle
+    // TODO: This is problematic because it doesn't pull tasks for the person if that task doesn't have a project assigned. Need to use a LEFT JOIN
+    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle, Person.PersonID
                 FROM Task JOIN Completes JOIN Person JOIN Project
                     ON Task.TaskID = Completes.TaskID
                     AND Completes.PersonID = Person.PersonID
