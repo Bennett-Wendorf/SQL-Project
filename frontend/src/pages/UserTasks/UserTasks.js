@@ -101,7 +101,7 @@ function TaskTable({ rows, projects, people, taskUpdate }) {
     }
 
     // Make a call to the backend api to update the task
-    // TODO: Check for an error response here
+    // BUG: Check for an error response here
     api.put(`/api/tasks/${updatedTask.taskID}`, updatedTask)
     .then(response => {
       taskUpdate(selectedPerson)
@@ -164,7 +164,7 @@ function TaskTable({ rows, projects, people, taskUpdate }) {
               >
                 <TableCell padding="checkbox">
                   <Tooltip title={Boolean(row.Completion) ? "Mark Incomplete" : "Mark Complete"}>
-                    <Checkbox testattr="Hello" color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} checked={Boolean(row.Completion)} onChange={(event) => handleCompletion(event, row.TaskID)}/>
+                    <Checkbox color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} checked={Boolean(row.Completion)} onChange={(event) => handleCompletion(event, row.TaskID)}/>
                   </Tooltip>
                 </TableCell>
                 <TableCell>{row.Title}</TableCell>
@@ -185,7 +185,7 @@ function TaskTable({ rows, projects, people, taskUpdate }) {
           Modify task "{selectedTask.Title}"
         </DialogTitle>
         <DialogContent>
-          {/* TODO: Limit how long these strings are so they don't break the database */}
+          {/* BUG: Limit how long these strings are so they don't break the database */}
           <TextField autoFocus id="Title" label="Title" type="text" fullWidth variant="outlined" margin="normal" onChange={handleUpdateTitleChange} value={updateTitle}/>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DesktopDatePicker label="Due Date" inputFormat="MM/dd/yyyy" renderInput={(params) => <TextField margin="normal" {...params}/>} onChange={handleUpdateDateChange} value={updateDueDate}/>
@@ -289,7 +289,7 @@ export function UserTasks() {
     }
 
     // Send a request to the backend to create a new task
-    // TODO: Check for an error response here
+    // BUG: Check for an error response here
     api.post(`/api/tasks`, newTask)
       .then(response => {
         updateTasks(selectedPerson)
@@ -309,7 +309,7 @@ export function UserTasks() {
   const updateTasks = (sp) => {
     api.get(`/api/tasks/person/${sp.personID}`)
     .then(response => {
-      // TODO: Check response for error
+      // BUG: Check response for error
       setTasks(response.data ? response.data.rows : [])
       console.log("Updating tasks");
     })
@@ -321,7 +321,7 @@ export function UserTasks() {
   const updateProjects = () => {
     api.get(`/api/projects`)
     .then(response => {
-      // TODO: Check response for error
+      // BUG: Check response for error
       setProjects(response.data ? response.data.rows : [])
       console.log("Updating projects");
     })
@@ -333,7 +333,7 @@ export function UserTasks() {
   const updatePeople = () => {
     api.get(`/api/people`)
     .then(response => {
-      // TODO: Check response for error
+      // BUG: Check response for error
       setPeople(response.data ? response.data.rows : [])
       console.log("Updating people");
     })
@@ -382,7 +382,7 @@ export function UserTasks() {
       <Dialog open={isDialogOpen} onClose={handleClose}>
         <DialogTitle>Add a New Task</DialogTitle>
         <DialogContent>
-          {/* TODO: Limit how long these strings are so they don't break the database */}
+          {/* BUG: Limit how long these strings are so they don't break the database */}
           <TextField autoFocus id="Title" label="Title" type="text" fullWidth variant="outlined" margin="normal" onChange={handleNewTitleChange} value={newTaskTitle}/>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DesktopDatePicker label="Due Date" inputFormat="MM/dd/yyyy" value={newTaskDate} onChange={handleNewDateChange} renderInput={(params) => <TextField margin="normal" {...params}/>} />

@@ -10,7 +10,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
 
-const drawerWidth = 220; // TODO: Move this elsewhere so it is accessible from both AppBar and NavDrawer
+const drawerWidth = 220; // FIXME: Move this elsewhere so it is accessible from both AppBar and NavDrawer
 
 // Generate css to style everything nicely
 const useStyles = makeStyles((theme) => ({

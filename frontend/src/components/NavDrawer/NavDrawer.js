@@ -100,7 +100,7 @@ function PersonMenu(){
   // TODO: Call this incrementally
   useEffect(() => api.get('/api/people')
     .then(response => { 
-      // TODO: Check response for error
+      // BUG: Check response for error
       setPeople(response.data ? response.data.rows : [])
     })
     .catch(err => console.log(err)), [])
