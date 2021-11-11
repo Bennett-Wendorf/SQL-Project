@@ -67,7 +67,7 @@ function addTask(req, res, next) {
     // TODO: Consider updating this so the frontend handles date conversion
     statement.run(newObject.title, newObject.completion, (new Date(newObject.dueDate).getTime() / 1000), (new Date(newObject.creationDate).getTime() / 1000), newObject.projectID, function (error, result) {
         // This callback function will assign the newly created task to the correct person, if needed
-        
+
         // Grab the id of the task that was just created. // TODO: Make sure this pulls what I think it does
         const newTaskID = this.lastID
 
@@ -95,7 +95,7 @@ function updateTask(req, res, next) {
 
     // Prep the sql statement and run it with the specified parameters
     // TODO: Rebuild this to be able to handle only receiving the information that needs to change
-    var statement = db.prepare(`UPDATE Task 
+    var statement = db.prepare(`UPDATE Task
                                 SET Completion = ?, DueDate = ?, ProjectID = ?, Title = ?
                                 WHERE TaskID = ?`)
     statement.run(updatedObject.completion, updatedObject.dueDate, updatedObject.projectID, updatedObject.title, updatedObject.taskID)
@@ -184,7 +184,7 @@ function getProjectTasks(req, res, next) {
 
     // TODO: Write this query to only pull tasks for the certain projects
     // Define the query to be run
-    let sql = `SELECT Task.Completion, Task.Title, Task.CreationDate, Task.DueDate
+    let sql = `SELECT *
                   FROM Task
                   WHERE Task.ProjectID = ${req.params.id}`
 
@@ -203,13 +203,13 @@ function getProjectTasks(req, res, next) {
 }
 
 // Return a json object containing all projects in the project table
-function getAllProjects(req, res, next) {
+function getIncompleteProjects(req, res, next) {
 
     // Query returns a list of all project that still have tasks remaing
     let sql = `SELECT Project.Title AS ProjectTitle, Project.DueDate, count(TaskID) as TaskCount
                   FROM Project JOIN Task
                     ON Project.ProjectID = Task.ProjectID
-                  GROUP BY Project.Title
+                  GROUP BY Project.ProjectID
                   HAVING Task.Completion = 0`
 
     // Run the above query and then call the callback function given the full set of rows
@@ -226,4 +226,4 @@ function getAllProjects(req, res, next) {
     })
 }
 
-module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, getAllProjects, addTask, updateTask, deleteTask, markCompleted }
+module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, getIncompleteProjects, addTask, updateTask, deleteTask, markCompleted }
