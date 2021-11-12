@@ -184,9 +184,10 @@ function getProjectTasks(req, res, next) {
 
     // TODO: Write this query to only pull tasks for the certain projects
     // Define the query to be run
-    let sql = `SELECT *
-                  FROM Task
-                  WHERE Task.ProjectID = ${req.params.id}`
+    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Project.Title AS ProjectTitle, Project.ProjectID
+                FROM Task JOIN Project
+                ON Task.ProjectID = Project.ProjectID
+                WHERE Project.ProjectID =  ${req.params.id}`
 
     // Run the above query then call the callback given the full set of rows
     db.all(sql, [], (err, rows) => {

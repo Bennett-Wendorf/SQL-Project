@@ -5,7 +5,7 @@ import CheckIcon from '@mui/icons-material/CheckCircleOutline';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 
 // Import general mui stuff
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Button, IconButton, Tooltip } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Button, Tooltip } from "@mui/material";
 
 // Import utilites and components
 import api from "../../utils/api";
@@ -24,15 +24,14 @@ export function Project() {
     .then(response => {
       // TODO: Check response for error
       setProjectTasks(response.data ? response.data.rows : [])
-      console.log(response)
       console.log("Updating project tasks");
     })
     .catch(err => console.log(err))
   }
 
-  useEffect(() = {
+  useEffect(() => {
     updateProjectTasks()
-  })
+  }, [])
 
   // For now, return a button to show on this component. // TODO: Change this to more useful content
   return (
@@ -67,13 +66,11 @@ export function Project() {
               >
                 <TableCell padding="checkbox">
                   <Tooltip title={Boolean(row.Completion) ? "Mark Incomplete" : "Mark Complete"}>
-                    {/* TODO: Try to use a custom attribute here instead of id. Or could pass a param to the handleComplete method */}
-                    <Checkbox id={row.TaskID.toString()} color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} /> {/*checked={Boolean(row.Completion)} onChange={handleCompletion} */}
+                    <Checkbox color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} />
                   </Tooltip>
                 </TableCell>
                 <TableCell>{row.Title}</TableCell>
-                //<TableCell align="right" size="small">{row.ProjectID === -1 ? "None" : row.ProjectTitle}</TableCell>
-                <TableCell allign="right" size="small">Temp</TableCell>
+                <TableCell align="right" size="small">{row.ProjectID === -1 ? "None" : row.ProjectTitle}</TableCell>
                 <TableCell align="right" size="small">{new Date(row.DueDate * 1000).toLocaleDateString("en-US", dateFormatOptions)}</TableCell>
               </TableRow>
             ))}
