@@ -25,12 +25,25 @@ import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DesktopDatePicker from '@mui/lab/DesktopDatePicker';
 
+import { makeStyles } from "@mui/styles";
+
 // Setup a general format for dates
 const dateFormatOptions = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }
+
+// Generate some themeing for this component
+const useStyles = makeStyles((theme) => ({
+  editDialogAssignee: {
+    marginRight: 8,
+    marginTop: 8,
+    marginBottom: 8,
+  }
+}));
 
 // Create a component for the table of tasks
 // TODO: Move this to its own file
 function TaskTable({ rows, projects, people, taskUpdate }) {
+
+  const classes = useStyles()
 
   // Grab the selected person piece of state so it can later be passed to the taskUpdate function
   const selectedPerson = useStore(state => state.selectedPerson)
@@ -51,7 +64,6 @@ function TaskTable({ rows, projects, people, taskUpdate }) {
 
   // Handle when a row is clicked and set up the pieces of state
   const handleRowClick = (event, task) => {
-    console.log(task);
     setSelectedTask(task)
     setUpdateComplete(Boolean(task.Completion))
     setUpdateTitle(task.Title)
@@ -97,7 +109,8 @@ function TaskTable({ rows, projects, people, taskUpdate }) {
       dueDate: updateDueDate.getTime() / 1000,
       projectID: updateProject,
       creationDate: creationDate,
-      taskID: taskID
+      taskID: taskID,
+      personID: updatePerson
     }
 
     // Make a call to the backend api to update the task
@@ -200,7 +213,7 @@ function TaskTable({ rows, projects, people, taskUpdate }) {
             </Select>
           </FormControl>
           {/* TODO: Enable this for reassigning tasks. It  will take a custom query to change multiple tables. */}
-          {/* <FormControl sx={{ m: 2, minWidth: 200 }}>
+          <FormControl sx={{ minWidth: 200 }} className={classes.editDialogAssignee}>
             <InputLabel id='assignee-select'>Assignee</InputLabel>
             <Select labelId="assignee-select-label" id="assignee-select" value={updatePerson} label="Person" onChange={handleUpdatePersonChange}>
               <MenuItem value={-1}>None</MenuItem>
@@ -208,7 +221,7 @@ function TaskTable({ rows, projects, people, taskUpdate }) {
                 <MenuItem key={row.PersonID} value={row.PersonID}>{row.FirstName + " " + row.LastName}</MenuItem>
               ))}
             </Select>
-          </FormControl> */}
+          </FormControl>
         </DialogContent>
 
         {/* Generate the buttons to act as actions on the dialog popup */}

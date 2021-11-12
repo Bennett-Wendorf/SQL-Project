@@ -87,11 +87,10 @@ function addTask(req, res, next) {
 }
 
 // Update the passed task object in the database
+// TODO: Ensure all these statements run as a transaction so we don't end up with inconsistencies
 function updateTask(req, res, next) {
     // The object to update
     const updatedObject = req.body
-
-    console.log(updatedObject)
 
     // Prep the sql statement and run it with the specified parameters
     // HACK: Rebuild this to be able to handle only receiving the information that needs to change
@@ -101,6 +100,14 @@ function updateTask(req, res, next) {
     statement.run(updatedObject.completion, updatedObject.dueDate, updatedObject.projectID, updatedObject.title, updatedObject.taskID)
 
     statement.finalize()
+
+    // Update the completes table with the new assignee
+    var statement2 = db.prepare(`UPDATE Completes
+                            SET DateAssigned = ?, PersonID = ?
+                            WHERE TaskID = ?`)
+    statement2.run(new Date().getTime() / 1000, updatedObject.personID, updatedObject.taskID)
+
+    statement2.finalize()
 
     // Return a success statement
     // BUG: Figure out how to return a failure statement here if the queries failed
