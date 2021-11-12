@@ -67,7 +67,7 @@ function addTask(req, res, next) {
     // Run the statement with the given parameters and define a callback to fun on completion
     statement.run(newObject.title, newObject.completion, newObject.dueDate, newObject.creationDate, newObject.projectID, function (error, result) {
         // This callback function will assign the newly created task to the correct person, if needed
-        
+
         // Grab the id of the task that was just created.
         const newTaskID = this.lastID
 
@@ -183,9 +183,10 @@ function getProjects(req, res, next) {
 function getProjectTasks(req, res, next) {
 
     // Define the query to be run
-    let sql = `SELECT Task.Completion, Task.Title, Task.CreationDate, Task.DueDate
-                  FROM Task
-                  WHERE Task.ProjectID = ${req.params.id}`
+    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Project.Title AS ProjectTitle, Project.ProjectID
+                FROM Task JOIN Project
+                ON Task.ProjectID = Project.ProjectID
+                WHERE Project.ProjectID =  ${req.params.id}`
 
     // Run the above query then call the callback given the full set of rows
     db.all(sql, [], (err, rows) => {
@@ -202,15 +203,14 @@ function getProjectTasks(req, res, next) {
 }
 
 // Return a json object containing all projects in the project table
-// FIXME: Rename this function or the getProjects function. They have different functionality, but names are too similar
-function getAllProjects(req, res, next) {
+function getIncompleteProjects(req, res, next) {
 
     // Query returns a list of all project that still have tasks remaining
     // HACK: Why does this group by Title and not ProjectID?
     let sql = `SELECT Project.Title AS ProjectTitle, Project.DueDate, count(TaskID) as TaskCount
                   FROM Project JOIN Task
                     ON Project.ProjectID = Task.ProjectID
-                  GROUP BY Project.Title
+                  GROUP BY Project.ProjectID
                   HAVING Task.Completion = 0` // HACK: Will this work to check like that? I'm guessing it's not going to do what we want
 
     // Run the above query and then call the callback function given the full set of rows
@@ -227,4 +227,4 @@ function getAllProjects(req, res, next) {
     })
 }
 
-module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, getAllProjects, addTask, updateTask, deleteTask, markCompleted }
+module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, getIncompleteProjects, addTask, updateTask, deleteTask, markCompleted }

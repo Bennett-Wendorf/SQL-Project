@@ -49,7 +49,7 @@ function TaskTable({ rows, projects, people, taskUpdate }) {
   const [creationDate, setCreationDate] = useState(new Date())
   const [taskID, setTaskID] = useState(-1)
 
-  // Handle when a row is clicked and set up the pieces of state 
+  // Handle when a row is clicked and set up the pieces of state
   const handleRowClick = (event, task) => {
     console.log(task);
     setSelectedTask(task)
@@ -294,7 +294,7 @@ export function UserTasks() {
       .then(response => {
         updateTasks(selectedPerson)
       })
-    
+
     // Set states for task attributes back to default
     // TODO: Move this to a method
     setNewTaskProject(defaultNewProjectID)
