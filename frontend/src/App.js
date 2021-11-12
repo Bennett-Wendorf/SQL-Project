@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
   toolbar: theme.mixins.toolbar,
 }));
 
-// TODO: Make sure this works on mobile too
+// TODO: Make sure this whole app works on mobile too
 
 // Build the JSX to export for this component. This defines how the entire app is structured
 function App() {

@@ -8,10 +8,9 @@ const db = new sqlite3.Database('./data.db')
 function getAllTasks(req, res, next) {
 
     // Define the query to be run
-    // TODO: Switch this to a left join so that tasks without projects are not left out
-    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle
-               FROM Task LEFT JOIN Project
-               ON Project.ProjectID = Task.ProjectID`
+    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle, Completes.PersonID
+                FROM Task LEFT NATURAL JOIN Completes LEFT JOIN Project
+                ON Task.ProjectID = Project.ProjectID`
 
     // Run the above query and then call the callback function given the full set of rows
     db.all(sql, [], (err, rows) => {
@@ -35,12 +34,12 @@ function getPersonsTasks(req, res, next) {
     }
 
     // Define the query to be run
-    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle
-                FROM Task JOIN Completes JOIN Person JOIN Project
-                    ON Task.TaskID = Completes.TaskID
-                    AND Completes.PersonID = Person.PersonID
-                    AND Project.ProjectID = Task.ProjectID
-                WHERE Person.PersonID = ${req.params.id}`
+    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle, Completes.PersonID
+                FROM Completes JOIN Task
+                ON Completes.TaskID = Task.TaskID
+                LEFT JOIN Project
+                ON Task.ProjectID = Project.ProjectID
+                WHERE Completes.PersonID = ${req.params.id}`
 
     // Run the above query then call the callback given the full set of rows
     db.all(sql, [], (err, rows) => {
@@ -60,15 +59,16 @@ function getPersonsTasks(req, res, next) {
 function addTask(req, res, next) {
     const newObject = req.body
 
+    console.log(newObject)
+
     // Prepare the sql statement to be run.
     var statement = db.prepare("INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES (?, ?, ?, ?, ?)")
 
     // Run the statement with the given parameters and define a callback to fun on completion
-    // TODO: Consider updating this so the frontend handles date conversion
-    statement.run(newObject.title, newObject.completion, (new Date(newObject.dueDate).getTime() / 1000), (new Date(newObject.creationDate).getTime() / 1000), newObject.projectID, function (error, result) {
+    statement.run(newObject.title, newObject.completion, newObject.dueDate, newObject.creationDate, newObject.projectID, function (error, result) {
         // This callback function will assign the newly created task to the correct person, if needed
 
-        // Grab the id of the task that was just created. // TODO: Make sure this pulls what I think it does
+        // Grab the id of the task that was just created.
         const newTaskID = this.lastID
 
         // If the newTaskID is defined and the assignee of the new task is not -1, then run another sql statement to add the assignment tuple to the Completes table
@@ -82,7 +82,7 @@ function addTask(req, res, next) {
     statement.finalize()
 
     // Return a success statement
-    // TODO: Figure out how to return a failure statement here if the queries failed
+    // BUG: Figure out how to return a failure statement here if the queries failed
     res.send("Success")
 }
 
@@ -94,8 +94,8 @@ function updateTask(req, res, next) {
     console.log(updatedObject)
 
     // Prep the sql statement and run it with the specified parameters
-    // TODO: Rebuild this to be able to handle only receiving the information that needs to change
-    var statement = db.prepare(`UPDATE Task
+    // HACK: Rebuild this to be able to handle only receiving the information that needs to change
+    var statement = db.prepare(`UPDATE Task 
                                 SET Completion = ?, DueDate = ?, ProjectID = ?, Title = ?
                                 WHERE TaskID = ?`)
     statement.run(updatedObject.completion, updatedObject.dueDate, updatedObject.projectID, updatedObject.title, updatedObject.taskID)
@@ -103,12 +103,12 @@ function updateTask(req, res, next) {
     statement.finalize()
 
     // Return a success statement
-    // TODO: Figure out how to return a failure statement here if the queries failed
+    // BUG: Figure out how to return a failure statement here if the queries failed
     res.send("Success")
 }
 
 // Mark the task as complete
-// TODO: Integrate this into the updateTask function
+// HACK: Integrate this into the updateTask function
 function markCompleted(req, res) {
     const updatedObject = req.body
 
@@ -120,7 +120,7 @@ function markCompleted(req, res) {
     statement.finalize()
 
     // Return a success statement
-    // TODO: Figure out how to return a failure statement here if the queries failed
+    // BUG: Figure out how to return a failure statement here if the queries failed
     res.send("Success")
 }
 
@@ -133,7 +133,7 @@ function deleteTask(req, res, next) {
     // Run the query with the passed id parameter
     statement.run(req.params.id)
 
-    // TODO: Check for errors here before returning success
+    // BUG: Check for errors here before returning success
     res.send("Success")
 }
 
@@ -182,7 +182,6 @@ function getProjects(req, res, next) {
 // Return all tasks that are a part of the specified project
 function getProjectTasks(req, res, next) {
 
-    // TODO: Write this query to only pull tasks for the certain projects
     // Define the query to be run
     let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Project.Title AS ProjectTitle, Project.ProjectID
                 FROM Task JOIN Project
@@ -206,12 +205,13 @@ function getProjectTasks(req, res, next) {
 // Return a json object containing all projects in the project table
 function getIncompleteProjects(req, res, next) {
 
-    // Query returns a list of all project that still have tasks remaing
+    // Query returns a list of all project that still have tasks remaining
+    // HACK: Why does this group by Title and not ProjectID?
     let sql = `SELECT Project.Title AS ProjectTitle, Project.DueDate, count(TaskID) as TaskCount
                   FROM Project JOIN Task
                     ON Project.ProjectID = Task.ProjectID
                   GROUP BY Project.ProjectID
-                  HAVING Task.Completion = 0`
+                  HAVING Task.Completion = 0` // HACK: Will this work to check like that? I'm guessing it's not going to do what we want
 
     // Run the above query and then call the callback function given the full set of rows
     db.all(sql, [], (err, rows) => {

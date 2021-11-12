@@ -29,7 +29,8 @@ import DesktopDatePicker from '@mui/lab/DesktopDatePicker';
 const dateFormatOptions = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }
 
 // Create a component for the table of tasks
-function TaskTable({ rows, projects, taskUpdate }) {
+// TODO: Move this to its own file
+function TaskTable({ rows, projects, people, taskUpdate }) {
 
   // Grab the selected person piece of state so it can later be passed to the taskUpdate function
   const selectedPerson = useStore(state => state.selectedPerson)
@@ -43,17 +44,20 @@ function TaskTable({ rows, projects, taskUpdate }) {
   const [updateTitle, setUpdateTitle] = useState("")
   const [updateDueDate, setUpdateDueDate] = useState(new Date())
   const [updateProject, setUpdateProject] = useState(-1)
+  const [updatePerson, setUpdatePerson] = useState(selectedPerson.personID)
 
   const [creationDate, setCreationDate] = useState(new Date())
   const [taskID, setTaskID] = useState(-1)
 
   // Handle when a row is clicked and set up the pieces of state
   const handleRowClick = (event, task) => {
+    console.log(task);
     setSelectedTask(task)
     setUpdateComplete(Boolean(task.Completion))
     setUpdateTitle(task.Title)
     setUpdateDueDate(new Date(task.DueDate * 1000))
     setUpdateProject(task.ProjectID)
+    setUpdatePerson(task.PersonID != null ? task.PersonID : -1)
     setIsModifyDialogOpen(true)
     setCreationDate(task.CreationDate)
     setTaskID(task.TaskID)
@@ -72,6 +76,9 @@ function TaskTable({ rows, projects, taskUpdate }) {
   }
   const handleUpdateProjectChange = (event) => {
     setUpdateProject(event.target.value)
+  }
+  const handleUpdatePersonChange = (event) => {
+    setUpdatePerson(event.target.value)
   }
 
   const handleClose = () => {
@@ -94,7 +101,7 @@ function TaskTable({ rows, projects, taskUpdate }) {
     }
 
     // Make a call to the backend api to update the task
-    // TODO: Check for an error response here
+    // BUG: Check for an error response here
     api.put(`/api/tasks/${updatedTask.taskID}`, updatedTask)
     .then(response => {
       taskUpdate(selectedPerson)
@@ -102,6 +109,7 @@ function TaskTable({ rows, projects, taskUpdate }) {
   }
 
   // Handle when the delete button is pressed for a selected task
+  // TODO: Add deletion confirmation
   const handleDelete = () => {
     setIsModifyDialogOpen(false)
 
@@ -112,14 +120,15 @@ function TaskTable({ rows, projects, taskUpdate }) {
       })
   }
 
-  const handleCompletion = (event) => {
+  const handleCompletion = (event, taskToComplete) => {
+
     // Suppress opening of the dialog box when the checkbox is clicked
     // TODO: Consider a better way to do this
     setIsModifyDialogOpen(false)
 
     const updatedTask = {
       completion: event.target.checked,
-      taskID: parseInt(event.target.id)
+      taskID: taskToComplete
     }
 
     api.put(`/api/task/complete/${updatedTask.taskID}`, updatedTask)
@@ -128,7 +137,6 @@ function TaskTable({ rows, projects, taskUpdate }) {
       })
   }
 
-  // TODO: Look into datagrid instead of table
   // TODO: Add spinner/message when rows is empty array
   return (
     <>
@@ -148,17 +156,15 @@ function TaskTable({ rows, projects, taskUpdate }) {
           <TableBody>
             {/* Map each task from the backend to a row in the table */}
             {rows.map((row) => (
-              // Handle mouse pointer on hover
               <TableRow
                 key={row.TaskID}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                sx={{ '&:last-child td, &:last-child th': { border: 0 }, cursor: 'pointer' }}
                 onClick={(event) => handleRowClick(event, row)}
                 hover
               >
                 <TableCell padding="checkbox">
                   <Tooltip title={Boolean(row.Completion) ? "Mark Incomplete" : "Mark Complete"}>
-                    {/* TODO: Try to use a custom attribute here instead of id. Or could pass a param to the handleComplete method */}
-                    <Checkbox id={row.TaskID.toString()} testattr="Hello" color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} checked={Boolean(row.Completion)} onChange={handleCompletion}/>
+                    <Checkbox color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} checked={Boolean(row.Completion)} onChange={(event) => handleCompletion(event, row.TaskID)}/>
                   </Tooltip>
                 </TableCell>
                 <TableCell>{row.Title}</TableCell>
@@ -172,13 +178,14 @@ function TaskTable({ rows, projects, taskUpdate }) {
 
       {/* The popup dialog for editing and deleting tasks */}
       <Dialog open={isModifyDialogOpen} onClose={handleClose}>
-        <DialogTitle>Modify task "{selectedTask.Title}"</DialogTitle>
-        <DialogContent>
+        <DialogTitle>
           <Tooltip title={updateComplete ? "Mark Incomplete" : "Mark Complete"}>
-            {/* TODO: Make it more obvious what this does */}
-            <Checkbox color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} checked={updateComplete} onChange={handleUpdateCompleteChange}/>
+            <Checkbox color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} checked={updateComplete} onChange={handleUpdateCompleteChange} margin='normal'/>
           </Tooltip>
-          {/* TODO: Limit how long these strings are so they don't break the database */}
+          Modify task "{selectedTask.Title}"
+        </DialogTitle>
+        <DialogContent>
+          {/* BUG: Limit how long these strings are so they don't break the database */}
           <TextField autoFocus id="Title" label="Title" type="text" fullWidth variant="outlined" margin="normal" onChange={handleUpdateTitleChange} value={updateTitle}/>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DesktopDatePicker label="Due Date" inputFormat="MM/dd/yyyy" renderInput={(params) => <TextField margin="normal" {...params}/>} onChange={handleUpdateDateChange} value={updateDueDate}/>
@@ -192,6 +199,16 @@ function TaskTable({ rows, projects, taskUpdate }) {
               ))}
             </Select>
           </FormControl>
+          {/* TODO: Enable this for reassigning tasks. It  will take a custom query to change multiple tables. */}
+          {/* <FormControl sx={{ m: 2, minWidth: 200 }}>
+            <InputLabel id='assignee-select'>Assignee</InputLabel>
+            <Select labelId="assignee-select-label" id="assignee-select" value={updatePerson} label="Person" onChange={handleUpdatePersonChange}>
+              <MenuItem value={-1}>None</MenuItem>
+              {people.map((row) => (
+                <MenuItem key={row.PersonID} value={row.PersonID}>{row.FirstName + " " + row.LastName}</MenuItem>
+              ))}
+            </Select>
+          </FormControl> */}
         </DialogContent>
 
         {/* Generate the buttons to act as actions on the dialog popup */}
@@ -216,11 +233,14 @@ export function UserTasks() {
   // Define a piece of state to use to store information from the api call
   const [tasks, setTasks] = useState([])
   const [projects, setProjects] = useState([])
+  const [people, setPeople] = useState([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [newTaskProjectID, setNewTaskProject] = useState(defaultNewProjectID)
   const [newTaskTitle, setNewTaskTitle] = useState(defaultNewTitle)
   const [newTaskDate, setNewTaskDate] = useState(defaultNewDate) // This will default to today
   const selectedPerson = useStore(state => state.selectedPerson)
+
+  const [newTaskPersonID, setNewTaskPerson] = useState(selectedPerson.personID)
 
   // Handle opening and closing of the dialog for new tasks
   const handleClickOpen = () => {
@@ -231,7 +251,9 @@ export function UserTasks() {
     updateTasks(selectedPerson)
 
     // Reset new task attributes back to default
+    // TODO: Move this to a method
     setNewTaskProject(defaultNewProjectID)
+    setNewTaskPerson(selectedPerson.personID)
     setNewTaskTitle(defaultNewTitle)
     setNewTaskDate(defaultNewDate)
   }
@@ -247,6 +269,10 @@ export function UserTasks() {
     setNewTaskProject(event.target.value)
   }
 
+  const handlePersonSelectChange = (event) => {
+    setNewTaskPerson(event.target.value)
+  }
+
   // Create a new task in the database and ensure data on the frontend is up to date
   const handleSubmit = (title, date, project) => {
     setIsDialogOpen(false)
@@ -255,24 +281,27 @@ export function UserTasks() {
     const newTask = {
       title: title,
       completion: false,
-      dueDate: date,
-      creationDate: new Date(),
+      // Convert the dates into unix timestamps
+      dueDate: new Date(date).getTime() / 1000,
+      creationDate: new Date().getTime() / 1000,
       projectID: project,
-      assignee: selectedPerson.personID
+      assignee: newTaskPersonID
     }
 
     // Send a request to the backend to create a new task
-    // TODO: Check for an error response here
+    // BUG: Check for an error response here
     api.post(`/api/tasks`, newTask)
       .then(response => {
         updateTasks(selectedPerson)
       })
 
     // Set states for task attributes back to default
+    // TODO: Move this to a method
     setNewTaskProject(defaultNewProjectID)
     setNewTaskTitle(defaultNewTitle)
     setNewTaskDate(defaultNewDate)
-
+    setNewTaskPerson(selectedPerson.personID)
+    
   }
 
   // Make an api call to the backend to update the list of tasks
@@ -280,7 +309,7 @@ export function UserTasks() {
   const updateTasks = (sp) => {
     api.get(`/api/tasks/person/${sp.personID}`)
     .then(response => {
-      // TODO: Check response for error
+      // BUG: Check response for error
       setTasks(response.data ? response.data.rows : [])
       console.log("Updating tasks");
     })
@@ -292,9 +321,21 @@ export function UserTasks() {
   const updateProjects = () => {
     api.get(`/api/projects`)
     .then(response => {
-      // TODO: Check response for error
+      // BUG: Check response for error
       setProjects(response.data ? response.data.rows : [])
       console.log("Updating projects");
+    })
+    .catch(err => console.log(err))
+  }
+
+  // Make a call to the backend to update the list of projeccts
+  // TODO: Call this incrementally
+  const updatePeople = () => {
+    api.get(`/api/people`)
+    .then(response => {
+      // BUG: Check response for error
+      setPeople(response.data ? response.data.rows : [])
+      console.log("Updating people");
     })
     .catch(err => console.log(err))
   }
@@ -302,6 +343,7 @@ export function UserTasks() {
   // The first time this component renders, update the Tasks
   useEffect(() => {
     updateProjects()
+    updatePeople()
     updateTasks(selectedPerson)
     const unsub1 = useStore.subscribe((state) => {
       updateTasks(state.selectedPerson)
@@ -334,14 +376,13 @@ export function UserTasks() {
       </Bar>
 
       {/* Include the TaskTable component here. This component is defined above */}
-      {/* TODO: Update tasks right away to that array only holds the data I need rather than having to drill to .data.rows later on*/}
-      <TaskTable rows={tasks} projects={projects} taskUpdate={updateTasks}/>
+      <TaskTable rows={tasks} projects={projects} people={people} taskUpdate={updateTasks}/>
 
       {/* Create the dialog box that will pop up when the Add button is pressed. This will add a new task to the database */}
       <Dialog open={isDialogOpen} onClose={handleClose}>
         <DialogTitle>Add a New Task</DialogTitle>
         <DialogContent>
-          {/* TODO: Limit how long these strings are so they don't break the database */}
+          {/* BUG: Limit how long these strings are so they don't break the database */}
           <TextField autoFocus id="Title" label="Title" type="text" fullWidth variant="outlined" margin="normal" onChange={handleNewTitleChange} value={newTaskTitle}/>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DesktopDatePicker label="Due Date" inputFormat="MM/dd/yyyy" value={newTaskDate} onChange={handleNewDateChange} renderInput={(params) => <TextField margin="normal" {...params}/>} />
@@ -352,6 +393,15 @@ export function UserTasks() {
               <MenuItem value={-1}>None</MenuItem>
               {projects.map((row) => (
                 <MenuItem key={row.ProjectID} value={row.ProjectID}>{row.Title}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl sx={{ m: 2, minWidth: 200 }}>
+            <InputLabel id='assignee-select'>Assignee</InputLabel>
+            <Select labelId="assignee-select-label" id="assignee-select" value={newTaskPersonID} label="Person" onChange={handlePersonSelectChange}>
+              <MenuItem value={-1}>None</MenuItem>
+              {people.map((row) => (
+                <MenuItem key={row.PersonID} value={row.PersonID}>{row.FirstName + " " + row.LastName}</MenuItem>
               ))}
             </Select>
           </FormControl>
