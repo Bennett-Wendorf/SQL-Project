@@ -376,16 +376,11 @@ export function UserTasks() {
             <AddIcon />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Sort" justify="right">
+        {/* <Tooltip title="Sort" justify="right">
           <IconButton aria-label="sort" size="large">
             <SortIcon />
           </IconButton>
-        </Tooltip>
-        <Tooltip title="Filter" justify="right">
-          <IconButton aria-label="filter" size="large">
-            <FilterIcon />
-          </IconButton>
-        </Tooltip>
+        </Tooltip> */}
       </Bar>
 
       {/* Include the TaskTable component here. This component is defined above */}
