@@ -8,9 +8,11 @@ const db = new sqlite3.Database('./data.db')
 function getAllTasks(req, res, next) {
 
     // Define the query to be run
+    // TODO: Allow the user to specify the ordering 
     let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle, Completes.PersonID
                 FROM Task LEFT NATURAL JOIN Completes LEFT JOIN Project
-                ON Task.ProjectID = Project.ProjectID`
+                ON Task.ProjectID = Project.ProjectID
+                ORDER BY Task.DueDate ASC`
 
     // Run the above query and then call the callback function given the full set of rows
     db.all(sql, [], (err, rows) => {
@@ -34,12 +36,14 @@ function getPersonsTasks(req, res, next) {
     }
 
     // Define the query to be run
+    // TODO: Allow the user to specify the ordering 
     let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle, Completes.PersonID
                 FROM Completes JOIN Task
                 ON Completes.TaskID = Task.TaskID
                 LEFT JOIN Project
                 ON Task.ProjectID = Project.ProjectID
-                WHERE Completes.PersonID = ${req.params.id}`
+                WHERE Completes.PersonID = ${req.params.id}
+                ORDER BY Task.DueDate ASC`
 
     // Run the above query then call the callback given the full set of rows
     db.all(sql, [], (err, rows) => {
@@ -190,10 +194,12 @@ function getProjects(req, res, next) {
 function getProjectTasks(req, res, next) {
 
     // Define the query to be run
+    // TODO: Allow the user to specify the ordering 
     let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Project.Title AS ProjectTitle, Project.ProjectID
                 FROM Task JOIN Project
                 ON Task.ProjectID = Project.ProjectID
-                WHERE Project.ProjectID =  ${req.params.id}`
+                WHERE Project.ProjectID =  ${req.params.id}
+                ORDER BY Task.DueDate ASC`
 
     // Run the above query then call the callback given the full set of rows
     db.all(sql, [], (err, rows) => {
