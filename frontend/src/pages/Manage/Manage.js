@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Bar from "../../components/Bar/Bar";
 
 // Import general mui stuff
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Toolbar } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Toolbar, Typography } from "@mui/material";
 
 // Import utilites and components
 import api from "../../utils/api";
@@ -11,6 +11,7 @@ import api from "../../utils/api";
 export function Manage() {
 
   const [freeUsers, setFreeUsers] = useState([])
+  const [bestUser, setBestUser] = useState({})
 
   // TODO: Make this refresh when tasks are reassigned
   const updateFreeUsers = () => {
@@ -23,12 +24,24 @@ export function Manage() {
       .catch(err => console.log(err))
   }
 
+  // TODO: Update this incrementally
+  const updateBestUser = () => {
+    api.get('/api/people/best')
+      .then(response => {
+        // TODO: Check for error response
+        setBestUser(response.data ? response.data : {})
+        console.log("Updating best user")
+      })
+      .catch(err => console.log(err))
+  }
+
   useEffect(() => {
     updateFreeUsers()
+    updateBestUser()
   }, [])
  
   return (
-    <div>
+    <>
       <Bar title="Manage"/>
       <Toolbar>Free Users</Toolbar>
       <TableContainer component={Paper}>
@@ -57,6 +70,8 @@ export function Manage() {
           </TableBody>
         </Table>
       </TableContainer>
-    </div>
+      <br/>
+      <Typography>The most productive person is {bestUser.FirstName} {bestUser.LastName} with a total of {bestUser.TasksCompleted} tasks completed.</Typography>
+    </>
   );
 }

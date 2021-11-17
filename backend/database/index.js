@@ -281,28 +281,22 @@ function getFreeUsers(req, res){
     })
 }
 
-function getNoTaskUsers(req, res, toReturn){
-    // // Get people with no tasks assigned 
-    // let sql2 = `SELECT PersonID, FirstName, LastName, JobRole
-    //             FROM Person NATURAL LEFT JOIN Completes
-    //             WHERE TaskID IS NULL`
+function getBestUser(req, res){
+    let sql = `SELECT PersonID, FirstName, LastName, JobRole, Max(CompletedTasks) AS TasksCompleted
+                FROM (SELECT PersonID, FirstName, LastName, JobRole, Count(*) AS CompletedTasks
+                    FROM Person NATURAL JOIN Completes NATURAL JOIN Task
+                    WHERE Completion = 1
+                    GROUP BY PersonID)`
 
-    // db.all(sql2, [], (err, rows) => {
-    //     if(err) {
-    //         res.status(400).json({"error": err.message})
-    //         return
-    //     }
+    // Get the first row from the query (since it's max, there should only ever by 1 anyway)
+    db.get(sql, [], (err, row) => {
+        if(err) {
+            res.status(400).json({"error":err.message})
+            return
+        }
 
-    //     console.log("Pushing the following rows into the array to return")
-    //     console.log(rows)
-    //     toReturn.push(rows)
-
-    //     console.log("Returning the following data")
-    //     console.log(toReturn);
-    //     res.json(toReturn)
-    // })
-    console.log(req)
-    console.log(toReturn)
+        res.json(row)
+    })
 }
 
-module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, getIncompleteProjects, addTask, updateTask, deleteTask, markCompleted, getFreeUsers }
+module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, getIncompleteProjects, addTask, updateTask, deleteTask, markCompleted, getFreeUsers, getBestUser }
