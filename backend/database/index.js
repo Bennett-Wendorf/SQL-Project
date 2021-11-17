@@ -213,7 +213,6 @@ function getProjectTasks(req, res, next) {
 function getIncompleteProjects(req, res, next) {
 
     // Query returns a list of all project that still have tasks remaining
-    // HACK: Why does this group by Title and not ProjectID?
     let sql = `SELECT Project.Title AS ProjectTitle, Project.DueDate, count(TaskID) as TaskCount
                   FROM Project JOIN Task
                     ON Project.ProjectID = Task.ProjectID
@@ -234,4 +233,70 @@ function getIncompleteProjects(req, res, next) {
     })
 }
 
-module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, getIncompleteProjects, addTask, updateTask, deleteTask, markCompleted }
+function getFreeUsers(req, res){
+
+    var toReturn = []
+
+    // Get all users whose tasks are all completed
+    let sql1 = `SELECT PersonID, FirstName, LastName, JobRole
+                FROM (SELECT PersonID, FirstName, LastName, JobRole, Task.Completion
+                    FROM Person NATURAL JOIN Completes NATURAL JOIN Task
+                    GROUP BY PersonID, Completion
+                    ORDER BY Completion ASC)
+                GROUP BY PersonID
+                HAVING Completion = 1`
+
+    // Make the first database query
+    db.all(sql1, [], (err, rows) => {
+        if(err) {
+            res.status(400).json({"error": err.message})
+            return
+        }
+
+        // Add the results of the first query to the array to return
+        rows.forEach(row => {
+            toReturn.push(row)
+        });
+
+        // Get people with no tasks assigned 
+        let sql2 = `SELECT PersonID, FirstName, LastName, JobRole
+        FROM Person NATURAL LEFT JOIN Completes
+        WHERE TaskID IS NULL`
+
+        // Run the second database query
+        db.all(sql2, [], (err, rows) => {
+            if(err) {
+                res.status(400).json({"error": err.message})
+                return
+            }
+
+            // Add the data from the second query to the list to return
+            rows.forEach(row => {
+                toReturn.push(row)
+            });
+
+            // Return the data
+            res.json({"rows": toReturn})
+        })
+    })
+}
+
+function getBestUser(req, res){
+    let sql = `SELECT PersonID, FirstName, LastName, JobRole, Max(CompletedTasks) AS TasksCompleted
+                FROM (SELECT PersonID, FirstName, LastName, JobRole, Count(*) AS CompletedTasks
+                    FROM Person NATURAL JOIN Completes NATURAL JOIN Task
+                    WHERE Completion = 1
+                    GROUP BY PersonID)`
+
+    // Get the first row from the query (since it's max, there should only ever by 1 anyway)
+    db.get(sql, [], (err, row) => {
+        if(err) {
+            res.status(400).json({"error":err.message})
+            return
+        }
+
+        res.json(row)
+    })
+}
+
+module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, getIncompleteProjects, addTask, updateTask, deleteTask, markCompleted, getFreeUsers, getBestUser }
