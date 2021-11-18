@@ -3,7 +3,7 @@ import React from "react";
 import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
 
 // Import Page component definitons
-import { UserTasks, Project, Manage } from "./pages";
+import { UserTasks, Project, Manage, Department } from "./pages";
 
 // Import css for this component
 import "./App.css";
@@ -44,7 +44,7 @@ function App() {
 
           {/* Create the routes to render certain pages at certain endpoints */}
           <Switch>
-            <Redirect exact from="/" to="project" />
+            <Redirect exact from="/" to="user-tasks" />
             <Route path="/manage">
               <Manage />
             </Route>
@@ -53,6 +53,9 @@ function App() {
             </Route>
             <Route path="/project">
               <Project />
+            </Route>
+            <Route path="/department">
+              <Department />
             </Route>
           </Switch>
         </div>

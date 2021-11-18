@@ -19,6 +19,7 @@ import ListItemText from "@mui/material/ListItemText";
 import TaskListIcon from '@mui/icons-material/FormatListBulletedRounded';
 import FolderIcon from '@mui/icons-material/FolderOpenRounded';
 import ManageIcon from "@mui/icons-material/Settings";
+import DeptIcon from '@mui/icons-material/Groups';
 import PersonIcon from "@mui/icons-material/Person";
 import { IconButton } from "@mui/material";
 
@@ -167,6 +168,13 @@ function NavDrawer() {
 
         {/* Create the list of buttons for each page and have them link to the proper endpoints */}
         <List>
+          <Link to="/user-tasks" className={classes.link}>
+            <ListItem button key="Tasks">
+              <ListItemIcon>{<TaskListIcon />}</ListItemIcon>
+              <ListItemText primary="User Tasks" />
+            </ListItem>
+          </Link>
+
           <Link to="/project" className={classes.link}>
             <ListItem button key="Project">
               <ListItemIcon>{<FolderIcon />}</ListItemIcon>
@@ -174,10 +182,10 @@ function NavDrawer() {
             </ListItem>
           </Link>
 
-          <Link to="/user-tasks" className={classes.link}>
-            <ListItem button key="Tasks">
-              <ListItemIcon>{<TaskListIcon />}</ListItemIcon>
-              <ListItemText primary="User Tasks" />
+          <Link to="/department" className={classes.link}>
+            <ListItem button key="Department">
+              <ListItemIcon>{<DeptIcon />}</ListItemIcon>
+              <ListItemText primary="Department" />
             </ListItem>
           </Link>
 
