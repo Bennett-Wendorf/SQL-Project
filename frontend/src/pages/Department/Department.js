@@ -34,7 +34,7 @@ export function Department() {
 
   const updateDepartmentPeople= () => {
     //FIX ME: Right now it mannualy has deptID of 1
-    api.get(`/api/tasks/people/department/1`)
+    api.get(`/api/people/department/${departmentSelect}`)
     .then(response => {
       // TODO: Check response for error
       setDepartmentPeople(response.data ? response.data.rows : [])

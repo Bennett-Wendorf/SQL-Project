@@ -50,10 +50,10 @@ app.get('/api/tasks/project/:id', getProjectTasks)
 app.get('/api/projects/incomplete', getIncompleteProjects)
 
 // Gets project overview (main query for project page)
-app.get('/api/tasks/projects/overview', getProjectOverview)
+app.get('/api/projects/overview', getProjectOverview)
 
 // Gets people that have worked for a certain department
-app.get('/api/tasks/people/department/:id', getDepartmentPeople)
+app.get('/api/people/department/:id', getDepartmentPeople)
 
 // Error handlers
 app.use((req, res) => res.status(404).send("404 NOT FOUND"))

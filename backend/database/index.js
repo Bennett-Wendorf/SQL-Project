@@ -264,13 +264,12 @@ function getDepartmentPeople(req, res, next) {
 
     // Define the query to be run
     let sql = ` SELECT Person.FirstName, Person.LastName, Person.JobRole
-                FROM Person JOIN Completes JOIN Task JOIN Project JOIN Houses JOIN Department
+                FROM Person JOIN Completes JOIN Task JOIN Project JOIN Houses
                   ON Person.PersonID = Completes.PersonID
                   AND Completes.TaskID = Task.TaskID
                   AND Task.ProjectID = Project.ProjectID
                   AND Project.ProjectID = Houses.ProjectID
-                  AND Houses.DeptID = Department.DeptID
-                WHERE Department.DeptID = ${req.params.id}
+                WHERE Houses.DeptID = ${req.params.id}
                 GROUP BY Person.PersonID
                 ORDER BY Person.LastName `
 

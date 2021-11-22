@@ -20,7 +20,7 @@ export function Project() {
 
   const updateProjectTasks = () => {
     //FIXME: Update this to handle different projects
-    api.get(`/api/tasks/projects/overview`)
+    api.get(`/api/projects/overview`)
     .then(response => {
       // TODO: Check response for error
       setProjectTasks(response.data ? response.data.rows : [])
