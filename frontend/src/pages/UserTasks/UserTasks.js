@@ -314,7 +314,7 @@ export function UserTasks() {
     setNewTaskTitle(defaultNewTitle)
     setNewTaskDate(defaultNewDate)
     setNewTaskPerson(selectedPerson.personID)
-    
+
   }
 
   // Make an api call to the backend to update the list of tasks

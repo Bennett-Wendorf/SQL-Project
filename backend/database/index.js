@@ -8,7 +8,7 @@ const db = new sqlite3.Database('./data.db')
 function getAllTasks(req, res, next) {
 
     // Define the query to be run
-    // TODO: Allow the user to specify the ordering 
+    // TODO: Allow the user to specify the ordering
     let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle, Completes.PersonID
                 FROM Task LEFT NATURAL JOIN Completes LEFT JOIN Project
                 ON Task.ProjectID = Project.ProjectID
@@ -36,7 +36,7 @@ function getPersonsTasks(req, res, next) {
     }
 
     // Define the query to be run
-    // TODO: Allow the user to specify the ordering 
+    // TODO: Allow the user to specify the ordering
     let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle, Completes.PersonID
                 FROM Completes JOIN Task
                 ON Completes.TaskID = Task.TaskID
@@ -98,7 +98,7 @@ function updateTask(req, res, next) {
 
     // Prep the sql statement and run it with the specified parameters
     // HACK: Rebuild this to be able to handle only receiving the information that needs to change
-    var statement = db.prepare(`UPDATE Task 
+    var statement = db.prepare(`UPDATE Task
                                 SET Completion = ?, DueDate = ?, ProjectID = ?, Title = ?
                                 WHERE TaskID = ?`)
     statement.run(updatedObject.completion, updatedObject.dueDate, updatedObject.projectID, updatedObject.title, updatedObject.taskID)
@@ -214,12 +214,66 @@ function getDepartments(req, res, next) {
 function getProjectTasks(req, res, next) {
 
     // Define the query to be run
-    // TODO: Allow the user to specify the ordering 
+    // TODO: Allow the user to specify the ordering
     let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Project.Title AS ProjectTitle, Project.ProjectID
                 FROM Task JOIN Project
                 ON Task.ProjectID = Project.ProjectID
                 WHERE Project.ProjectID =  ${req.params.id}
                 ORDER BY Task.DueDate ASC`
+
+    // Run the above query then call the callback given the full set of rows
+    db.all(sql, [], (err, rows) => {
+        if(err) {
+            res.status(400).json({"error": err.message})
+            return
+        }
+
+        // Set the response to this api call as the data from the database
+        res.json({
+            rows
+        })
+    })
+}
+
+// Return all projects and a count of their remaining tasks
+function getProjectOverview(req, res, next) {
+
+    // Define the query to be run
+    let sql = ` SELECT Project.Title, IFNULL((count(Task.Completion)-sum(Task.Completion)), 0) AS TaskRemaining, Project.DueDate
+                FROM Project LEFT JOIN Task
+                ON Project.ProjectID = Task.ProjectID
+                GROUP BY Project.ProjectID
+                ORDER BY Project.DueDate ASC `
+
+    // Run the above query then call the callback given the full set of rows
+    db.all(sql, [], (err, rows) => {
+        if(err) {
+            res.status(400).json({"error": err.message})
+            return
+        }
+
+        // Set the response to this api call as the data from the database
+        res.json({
+            rows
+        })
+    })
+}
+
+// Return all projects and a count of their remaining tasks
+function getDepartmentPeople(req, res, next) {
+
+    // Define the query to be run
+    let sql = ` SELECT Person.FirstName, Person.LastName, Person.JobRole
+                FROM Person JOIN Completes JOIN Task JOIN Project JOIN Houses JOIN Department
+                  ON Person.PersonID = Completes.PersonID
+                  AND Completes.TaskID = Task.TaskID
+                  AND Task.ProjectID = Project.ProjectID
+                  AND Project.ProjectID = Houses.ProjectID
+                  AND Houses.DeptID = Department.DeptID
+                WHERE Department.DeptID = ${req.params.id}
+                GROUP BY Person.PersonID
+                ORDER BY Person.LastName `
+
 
     // Run the above query then call the callback given the full set of rows
     db.all(sql, [], (err, rows) => {
@@ -284,7 +338,7 @@ function getFreeUsers(req, res){
             toReturn.push(row)
         });
 
-        // Get people with no tasks assigned 
+        // Get people with no tasks assigned
         let sql2 = `SELECT PersonID, FirstName, LastName, JobRole
         FROM Person NATURAL LEFT JOIN Completes
         WHERE TaskID IS NULL`
@@ -325,4 +379,4 @@ function getBestUser(req, res){
     })
 }
 
-module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getDepartments, getProjectTasks, getIncompleteProjects, addTask, updateTask, deleteTask, markCompleted, getFreeUsers, getBestUser }
+module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getDepartments, getProjectTasks, getIncompleteProjects, addTask, updateTask, deleteTask, markCompleted, getFreeUsers, getBestUser, getProjectOverview, getDepartmentPeople }

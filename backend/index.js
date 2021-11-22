@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const options = {cors: {origin: "*",},};
-const { getAllTasks, getPersonsTasks, getPeople, getProjects, getDepartments, getProjectTasks, getIncompleteProjects, addTask, updateTask, deleteTask, markCompleted, getFreeUsers, getBestUser } = require('./database')
+const { getAllTasks, getPersonsTasks, getPeople, getProjects, getDepartments, getProjectTasks, getIncompleteProjects, addTask, updateTask, deleteTask, markCompleted, getFreeUsers, getBestUser, getProjectOverview, getDepartmentPeople } = require('./database')
 
 // Define the port to run the backend on as the enviroment variable for port, or 3500 if that variable is not defined
 const PORT = process.env.PORT || 3500;
@@ -48,6 +48,12 @@ app.get('/api/departments', getDepartments)
 app.get('/api/tasks/project/:id', getProjectTasks)
 
 app.get('/api/projects/incomplete', getIncompleteProjects)
+
+// Gets project overview (main query for project page)
+app.get('/api/tasks/projects/overview', getProjectOverview)
+
+// Gets people that have worked for a certain department
+app.get('/api/tasks/people/department/:id', getDepartmentPeople)
 
 // Error handlers
 app.use((req, res) => res.status(404).send("404 NOT FOUND"))

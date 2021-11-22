@@ -20,7 +20,7 @@ export function Project() {
 
   const updateProjectTasks = () => {
     //FIXME: Update this to handle different projects
-    api.get(`/api/tasks/project/1`)
+    api.get(`/api/tasks/projects/overview`)
     .then(response => {
       // TODO: Check response for error
       setProjectTasks(response.data ? response.data.rows : [])
@@ -43,9 +43,8 @@ export function Project() {
           {/* Generate the headers of the rows */}
           <TableHead>
             <TableRow>
-              <TableCell></TableCell>
-              <TableCell>Title</TableCell>
-              <TableCell align="right">Project</TableCell>
+              <TableCell>Project Title</TableCell>
+              <TableCell align="right">Tasks remaining</TableCell>
               <TableCell align="right">Due</TableCell>
             </TableRow>
           </TableHead>
@@ -59,14 +58,9 @@ export function Project() {
                 //onClick={(event) => handleRowClick(event, row)}
                 hover
               >
-                <TableCell padding="checkbox">
-                  <Tooltip title={Boolean(row.Completion) ? "Mark Incomplete" : "Mark Complete"}>
-                    <Checkbox color="primary" icon={<RadioButtonUncheckedIcon />} checkedIcon={<CheckIcon />} />
-                  </Tooltip>
-                </TableCell>
                 <TableCell>{row.Title}</TableCell>
-                <TableCell align="right" size="small">{row.ProjectID === -1 ? "None" : row.ProjectTitle}</TableCell>
-                <TableCell align="right" size="small">{new Date(row.DueDate * 1000).toLocaleDateString("en-US", dateFormatOptions)}</TableCell>
+                <TableCell align="right" size="small">{row.TaskRemaining}</TableCell>
+                <TableCell align="right" size="medium">{new Date(row.DueDate * 1000).toLocaleDateString("en-US", dateFormatOptions)}</TableCell>
               </TableRow>
             ))}
           </TableBody>

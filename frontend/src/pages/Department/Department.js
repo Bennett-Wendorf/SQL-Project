@@ -12,35 +12,13 @@ import api from "../../utils/api";
 // Create the manage page component
 export function Department() {
 
-  const [freeUsers, setFreeUsers] = useState([])
-  const [bestUser, setBestUser] = useState({})
   const [departments, setDepartments] = useState([])
   const [departmentSelect, setDepartmentSelect] = useState(1)
+  const [departmentPeople, setDepartmentPeople] = useState([])
+
 
   const handleDeptSelectChange = (event) => {
     setDepartmentSelect(event.target.value)
-  }
-
-  // TODO: Make this refresh when tasks are reassigned
-  const updateFreeUsers = () => {
-    api.get('/api/people/free')
-      .then(response => {
-        // TODO: Check for error response
-        setFreeUsers(response.data ? response.data.rows : [])
-        console.log("Updating free users")
-      })
-      .catch(err => console.log(err))
-  }
-
-  // TODO: Update this incrementally
-  const updateBestUser = () => {
-    api.get('/api/people/best')
-      .then(response => {
-        // TODO: Check for error response
-        setBestUser(response.data ? response.data : {})
-        console.log("Updating best user")
-      })
-      .catch(err => console.log(err))
   }
 
   // TODO: update this incrementally
@@ -54,12 +32,22 @@ export function Department() {
       .catch(err => console.log(err))
   }
 
+  const updateDepartmentPeople= () => {
+    //FIXME: Update this to handle different projects
+    api.get(`/api/tasks/people/overview/:id`)
+    .then(response => {
+      // TODO: Check response for error
+      setDepartmentPeople(response.data ? response.data.rows : [])
+      console.log("Updating project tasks");
+    })
+    .catch(err => console.log(err))
+  }
+
   useEffect(() => {
-    updateFreeUsers()
-    updateBestUser()
     updateDepartments()
+    updateDepartmentPeople()
   }, [])
- 
+
   return (
     <>
       <Bar title="Department">
@@ -86,7 +74,7 @@ export function Department() {
           </TableHead>
           <TableBody>
             {/* Map each task from the backend to a row in the table */}
-            {freeUsers.map((row) => (
+            {departmentPeople.map((row) => (
               <TableRow
                 key={row.PersonID}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -100,7 +88,6 @@ export function Department() {
         </Table>
       </TableContainer>
       <br/>
-      <Typography>The most productive person is {bestUser.FirstName} {bestUser.LastName} with a total of {bestUser.TasksCompleted} tasks completed.</Typography>
     </>
   );
 }
