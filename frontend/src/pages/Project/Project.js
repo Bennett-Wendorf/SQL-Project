@@ -36,12 +36,7 @@ export function Project() {
   // For now, return a button to show on this component. // TODO: Change this to more useful content
   return (
     <div>
-      <Bar title="Project">
-        <Button aria-label="projects" size="medium" justify="left" startIcon={<DropDownIcon />}>
-          Project {/* TODO Add a project dropdown here using <Select />*/}
-        </Button>
-      </Bar>
-
+      <Bar title="Project" />
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="User's Tasks">
 
