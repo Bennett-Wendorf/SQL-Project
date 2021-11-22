@@ -33,12 +33,12 @@ export function Department() {
   }
 
   const updateDepartmentPeople= () => {
-    //FIXME: Update this to handle different projects
-    api.get(`/api/tasks/people/overview/:id`)
+    //FIX ME: Right now it mannualy has deptID of 1
+    api.get(`/api/tasks/people/department/1`)
     .then(response => {
       // TODO: Check response for error
       setDepartmentPeople(response.data ? response.data.rows : [])
-      console.log("Updating project tasks");
+      console.log("Updating department people");
     })
     .catch(err => console.log(err))
   }
@@ -60,7 +60,7 @@ export function Department() {
           </Select>
         </FormControl>
       </Bar>
-      <Toolbar>Free Users</Toolbar>
+      <Toolbar>Employees</Toolbar>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="Free Users">
 
