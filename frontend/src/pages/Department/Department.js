@@ -4,6 +4,8 @@ import Bar from "../../components/Bar/Bar";
 // Import general mui stuff
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Toolbar, Typography } from "@mui/material";
 
+import { FormControl, Select, MenuItem, InputLabel } from '@mui/material';
+
 // Import utilites and components
 import api from "../../utils/api";
 
@@ -12,6 +14,12 @@ export function Department() {
 
   const [freeUsers, setFreeUsers] = useState([])
   const [bestUser, setBestUser] = useState({})
+  const [departments, setDepartments] = useState([])
+  const [departmentSelect, setDepartmentSelect] = useState(1)
+
+  const handleDeptSelectChange = (event) => {
+    setDepartmentSelect(event.target.value)
+  }
 
   // TODO: Make this refresh when tasks are reassigned
   const updateFreeUsers = () => {
@@ -35,14 +43,35 @@ export function Department() {
       .catch(err => console.log(err))
   }
 
+  // TODO: update this incrementally
+  const updateDepartments = () => {
+    api.get('/api/departments')
+      .then(response => {
+        // TODO: Check for error response
+        setDepartments(response.data ? response.data.rows : [])
+        console.log("Updating departments")
+      })
+      .catch(err => console.log(err))
+  }
+
   useEffect(() => {
     updateFreeUsers()
     updateBestUser()
+    updateDepartments()
   }, [])
  
   return (
     <>
-      <Bar title="Department"/>
+      <Bar title="Department">
+        <FormControl sx={{ m: 2, minWidth: 120 }} justify="left">
+          <InputLabel id="dept-select-label">Department</InputLabel>
+          <Select labelId="dept-select-label" id="dept-select" label="Department" value={departmentSelect} onChange={handleDeptSelectChange}>
+            {departments.map((row) => (
+              <MenuItem key={row.DeptID} value={row.DeptID}>{row.DeptName}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Bar>
       <Toolbar>Free Users</Toolbar>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="Free Users">

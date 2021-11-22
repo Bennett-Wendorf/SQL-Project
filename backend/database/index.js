@@ -172,9 +172,29 @@ function getPeople(req, res, next) {
 // Return all projects from the database
 function getProjects(req, res, next) {
 
-    // Define the query to be fun
+    // Define the query to be run
     let sql =  `SELECT *
                 FROM Project`
+
+    // Run the above query and call the callback to return all rows as json
+    db.all(sql, [], (err, rows) => {
+        if(err) {
+            res.status(400).json({"error": err.message})
+            return
+        }
+
+        // Set the response to be the new data
+        res.json({
+            rows
+        })
+    })
+}
+
+// Return all departments from the database
+function getDepartments(req, res, next) {
+    // Define the query to be run
+    let sql = `SELECT *
+                FROM Department`
 
     // Run the above query and call the callback to return all rows as json
     db.all(sql, [], (err, rows) => {
@@ -305,4 +325,4 @@ function getBestUser(req, res){
     })
 }
 
-module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getProjectTasks, getIncompleteProjects, addTask, updateTask, deleteTask, markCompleted, getFreeUsers, getBestUser }
+module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getDepartments, getProjectTasks, getIncompleteProjects, addTask, updateTask, deleteTask, markCompleted, getFreeUsers, getBestUser }
