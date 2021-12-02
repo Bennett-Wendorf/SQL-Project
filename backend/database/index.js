@@ -239,8 +239,7 @@ function getProjectTasks(req, res, next) {
 function getProjectOverview(req, res, next) {
 
     // Define the query to be run
-    // TODO: Can we Do this? Check if this is one of our advanced queries!
-    let sql = ` SELECT Project.Title, IFNULL((count(Task.Completion)-sum(Task.Completion)), 0) AS TaskRemaining, Project.DueDate
+    let sql = ` SELECT Project.Title, count(Task.Completion)-sum(Task.Completion) AS TaskRemaining, Project.DueDate
                 FROM Project LEFT JOIN Task
                 ON Project.ProjectID = Task.ProjectID
                 GROUP BY Project.ProjectID

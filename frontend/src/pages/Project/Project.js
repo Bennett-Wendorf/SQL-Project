@@ -55,7 +55,7 @@ export function Project() {
                 hover
               >
                 <TableCell>{row.Title}</TableCell>
-                <TableCell align="right" size="small">{row.TaskRemaining}</TableCell>
+                <TableCell align="right" size="small">{row.TaskRemaining ? row.TaskRemaining : 0}</TableCell>
                 <TableCell align="right" size="medium">{new Date(row.DueDate * 1000).toLocaleDateString("en-US", dateFormatOptions)}</TableCell>
               </TableRow>
             ))}
