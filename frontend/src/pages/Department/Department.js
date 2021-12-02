@@ -19,6 +19,7 @@ export function Department() {
 
   const handleDeptSelectChange = (event) => {
     setDepartmentSelect(event.target.value)
+    updateDepartmentPeople(event.target.value)
   }
 
   // TODO: update this incrementally
@@ -32,9 +33,8 @@ export function Department() {
       .catch(err => console.log(err))
   }
 
-  const updateDepartmentPeople= () => {
-    //FIX ME: Right now it mannualy has deptID of 1
-    api.get(`/api/people/department/${departmentSelect}`)
+  const updateDepartmentPeople = (sd) => {
+    api.get(`/api/people/department/${sd}`)
     .then(response => {
       // TODO: Check response for error
       setDepartmentPeople(response.data ? response.data.rows : [])
@@ -45,7 +45,7 @@ export function Department() {
 
   useEffect(() => {
     updateDepartments()
-    updateDepartmentPeople()
+    updateDepartmentPeople(departmentSelect)
   }, [])
 
   return (

@@ -107,7 +107,7 @@ INSERT INTO Houses (ProjectID, DeptID) VALUES (2, 2);
 INSERT INTO Houses (ProjectID, DeptID) VALUES (2, 3);
 INSERT INTO Houses (ProjectID, DeptID) VALUES (2, 4);
 
-INSERT INTO Houses(ProjectID, DeptID) VALUES (3, 3);
+INSERT INTO Houses(ProjectID, DeptID) VALUES (4, 3);
 
 -- Completes --
 INSERT INTO Completes (DateAssigned, TaskID, PersonID) VALUES (1622091600, 1, 4); /* May 27th, 2021*/

@@ -259,7 +259,7 @@ function getProjectOverview(req, res, next) {
     })
 }
 
-// Return all projects and a count of their remaining tasks
+// Return all people who have done work for the given dept
 function getDepartmentPeople(req, res, next) {
 
     // Define the query to be run
