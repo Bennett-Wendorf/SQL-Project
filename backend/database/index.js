@@ -239,6 +239,7 @@ function getProjectTasks(req, res, next) {
 function getProjectOverview(req, res, next) {
 
     // Define the query to be run
+    // TODO: Can we Do this? Check if this is one of our advanced queries!
     let sql = ` SELECT Project.Title, IFNULL((count(Task.Completion)-sum(Task.Completion)), 0) AS TaskRemaining, Project.DueDate
                 FROM Project LEFT JOIN Task
                 ON Project.ProjectID = Task.ProjectID
@@ -288,10 +289,11 @@ function getDepartmentPeople(req, res, next) {
     })
 }
 
-// Return a json object containing all projects in the project table
+// Return a json object containing all projects with tasks that are incomplete
 function getIncompleteProjects(req, res, next) {
 
     // Query returns a list of all project that still have tasks remaining
+    // TODO: Find a way to implement this into the frontend
     let sql = `SELECT Project.Title AS ProjectTitle, Project.DueDate, count(TaskID) as TaskCount
                   FROM Project JOIN Task
                     ON Project.ProjectID = Task.ProjectID
@@ -312,6 +314,7 @@ function getIncompleteProjects(req, res, next) {
     })
 }
 
+// Get all users whose tasks are all completed or who has no tasks assigned
 function getFreeUsers(req, res){
 
     var toReturn = []
@@ -360,6 +363,7 @@ function getFreeUsers(req, res){
     })
 }
 
+// Get the user that has completed the most tasks
 function getBestUser(req, res){
     let sql = `SELECT PersonID, FirstName, LastName, JobRole, Max(CompletedTasks) AS TasksCompleted
                 FROM (SELECT PersonID, FirstName, LastName, JobRole, Count(*) AS CompletedTasks

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Bar from "../../components/Bar/Bar";
 
 // Import general mui stuff
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Toolbar, Typography } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Toolbar } from "@mui/material";
 
 import { FormControl, Select, MenuItem, InputLabel } from '@mui/material';
 

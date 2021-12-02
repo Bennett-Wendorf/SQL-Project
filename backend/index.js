@@ -47,6 +47,7 @@ app.get('/api/departments', getDepartments)
 // Get all tasks part of the project with the specified id
 app.get('/api/tasks/project/:id', getProjectTasks)
 
+// Get all projects that have incomplete tasks
 app.get('/api/projects/incomplete', getIncompleteProjects)
 
 // Gets project overview (main query for project page)

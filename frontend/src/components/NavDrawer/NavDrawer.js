@@ -84,7 +84,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-// Create the PersonMenu component to allow the user to select whos tasks they want to be able to view
+// Create the PersonMenu component to allow the user to select whose tasks they want to be able to view
 function PersonMenu(){
 
   // Pieces of state for menu handling

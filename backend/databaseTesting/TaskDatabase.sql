@@ -4,7 +4,7 @@
    Script: TaskDatabase.sql
    Description: Creates and populates the Task database.
    DB Server: Sqlite
-   Author: Connor Marks and Bennet Wendorf
+   Author: Connor Marks and Bennett Wendorf
 ********************************************************************************/
 
 

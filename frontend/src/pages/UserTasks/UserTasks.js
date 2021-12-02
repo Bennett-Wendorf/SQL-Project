@@ -8,8 +8,6 @@ import Bar from "../../components/Bar/Bar";
 
 // Import icons from mui
 import AddIcon from '@mui/icons-material/AddCircle';
-import FilterIcon from '@mui/icons-material/FilterAlt';
-import SortIcon from '@mui/icons-material/Sort';
 import CheckIcon from '@mui/icons-material/CheckCircleOutline';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 
@@ -376,11 +374,6 @@ export function UserTasks() {
             <AddIcon />
           </IconButton>
         </Tooltip>
-        {/* <Tooltip title="Sort" justify="right">
-          <IconButton aria-label="sort" size="large">
-            <SortIcon />
-          </IconButton>
-        </Tooltip> */}
       </Bar>
 
       {/* Include the TaskTable component here. This component is defined above */}

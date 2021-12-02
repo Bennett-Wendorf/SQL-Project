@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Bar from "../../components/Bar/Bar";
-import DropDownIcon from '@mui/icons-material/ArrowDropDownCircle';
-import CheckIcon from '@mui/icons-material/CheckCircleOutline';
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 
 // Import general mui stuff
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Button, Tooltip } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
 
 // Import utilites and components
 import api from "../../utils/api";
@@ -19,7 +16,6 @@ export function Project() {
   const [projectTasks, setProjectTasks] = useState ([])
 
   const updateProjectTasks = () => {
-    //FIXME: Update this to handle different projects
     api.get(`/api/projects/overview`)
     .then(response => {
       // TODO: Check response for error
@@ -33,7 +29,7 @@ export function Project() {
     updateProjectTasks()
   }, [])
 
-  // For now, return a button to show on this component. // TODO: Change this to more useful content
+  // For now, return a button to show on this component.
   return (
     <div>
       <Bar title="Project" />
