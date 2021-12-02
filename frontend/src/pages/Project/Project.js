@@ -51,8 +51,6 @@ export function Project() {
               <TableRow
                 key={row.TaskID}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                //onClick={(event) => handleRowClick(event, row)}
-                hover
               >
                 <TableCell>{row.Title}</TableCell>
                 <TableCell align="right" size="small">{row.TaskRemaining ? row.TaskRemaining : 0}</TableCell>
