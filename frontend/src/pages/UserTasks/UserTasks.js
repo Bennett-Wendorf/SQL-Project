@@ -87,6 +87,8 @@ function TaskTable({ rows, projects, people, taskUpdate }) {
   const handleUpdateProjectChange = (event) => {
     setUpdateProject(event.target.value)
   }
+
+  // TODO: If person was changed, then need to change dateAssigned attribute in completes table
   const handleUpdatePersonChange = (event) => {
     setUpdatePerson(event.target.value)
   }
