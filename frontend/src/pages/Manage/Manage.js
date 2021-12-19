@@ -13,23 +13,19 @@ export function Manage() {
   const [freeUsers, setFreeUsers] = useState([])
   const [bestUser, setBestUser] = useState({})
 
-  // TODO: Make this refresh when tasks are reassigned
   const updateFreeUsers = () => {
     api.get('/api/people/free')
       .then(response => {
-        // TODO: Check for error response
         setFreeUsers(response.data ? response.data.rows : [])
         console.log("Updating free users")
       })
       .catch(err => console.log(err))
   }
 
-  // TODO: Update this incrementally
   const updateBestUser = () => {
     api.get('/api/people/best')
       .then(response => {
-        // TODO: Check for error response
-        setBestUser(response.data ? response.data : {})
+        setBestUser(response.data ? response.data.rows[0] : {})
         console.log("Updating best user")
       })
       .catch(err => console.log(err))
@@ -71,7 +67,7 @@ export function Manage() {
         </Table>
       </TableContainer>
       <br/>
-      <Typography>The most productive person is {bestUser.FirstName} {bestUser.LastName} with a total of {bestUser.TasksCompleted} tasks completed.</Typography>
+      <Typography>The most productive person is {bestUser.FirstName} {bestUser.LastName} with a total of {bestUser.CompletedTasks} tasks completed.</Typography>
     </>
   );
 }

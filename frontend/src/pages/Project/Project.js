@@ -18,7 +18,6 @@ export function Project() {
   const updateProjectTasks = () => {
     api.get(`/api/projects/overview`)
     .then(response => {
-      // TODO: Check response for error
       setProjectTasks(response.data ? response.data.rows : [])
       console.log("Updating project tasks");
     })

@@ -106,7 +106,6 @@ export function UserTasks() {
   const updateTasks = (sp) => {
     api.get(`/api/tasks/person/${sp.personID}`)
     .then(response => {
-      // BUG: Check response for error
       setTasks(response.data ? response.data.rows : [])
       console.log("Updating tasks");
     })
@@ -118,19 +117,17 @@ export function UserTasks() {
   const updateProjects = () => {
     api.get(`/api/projects`)
     .then(response => {
-      // BUG: Check response for error
       setProjects(response.data ? response.data.rows : [])
       console.log("Updating projects");
     })
     .catch(err => console.log(err))
   }
 
-  // Make a call to the backend to update the list of projeccts
+  // Make a call to the backend to update the list of people
   // TODO: Call this incrementally
   const updatePeople = () => {
     api.get(`/api/people`)
     .then(response => {
-      // BUG: Check response for error
       setPeople(response.data ? response.data.rows : [])
       console.log("Updating people");
     })

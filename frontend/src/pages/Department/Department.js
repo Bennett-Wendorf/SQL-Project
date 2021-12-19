@@ -26,7 +26,6 @@ export function Department() {
   const updateDepartments = () => {
     api.get('/api/departments')
       .then(response => {
-        // TODO: Check for error response
         setDepartments(response.data ? response.data.rows : [])
         console.log("Updating departments")
       })
@@ -36,7 +35,6 @@ export function Department() {
   const updateDepartmentPeople = (sd) => {
     api.get(`/api/people/department/${sd}`)
     .then(response => {
-      // TODO: Check response for error
       setDepartmentPeople(response.data ? response.data.rows : [])
       console.log("Updating department people");
     })

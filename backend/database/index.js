@@ -7,7 +7,7 @@ const db = new sqlite3.Database('./data.db')
 const mariadb = require('mariadb')
 
 const pool = mariadb.createPool({
-    host: '10.0.52.18',
+    host: 'localhost',
     user: 'appuser',
     password: 'AppUser123@',
     connectionLimit: 5,
@@ -72,94 +72,156 @@ async function getPersonsTasks(req, res, next) {
 }
 
 // Add a new task to the database
-function addTask(req, res, next) {
+async function addTask(req, res, next) {
     const newObject = req.body
 
     // Prepare the sql statement to be run.
-    var statement = db.prepare("INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES (?, ?, ?, ?, ?)")
+    var sql = `INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES (?, ?, ?, ?, ?)`
+    var assignSQL = `INSERT INTO Completes (DateAssigned, PersonID, TaskID) VALUES (?, ?, ?)`
 
-    // Run the statement with the given parameters and define a callback to fun on completion
-    statement.run(newObject.title, newObject.completion, newObject.dueDate, newObject.creationDate, newObject.projectID, function (error, result) {
-        // This callback function will assign the newly created task to the correct person, if needed
+    // Add the new task and return the response
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        let result;
 
-        // Grab the id of the task that was just created.
-        const newTaskID = this.lastID
-
-        // If the newTaskID is defined and the assignee of the new task is not -1, then run another sql statement to add the assignment tuple to the Completes table
-        if(newTaskID && newObject.assignee != -1){
-            var assignStatement = db.prepare("INSERT INTO Completes (DateAssigned, TaskID, PersonID) VALUES (?, ?, ?)")
-            assignStatement.run((new Date().getTime() / 1000), newTaskID, newObject.assignee)
-            assignStatement.finalize()
+        if(newObject.projectID == -1){
+            result = await conn.query(sql, [newObject.title, newObject.completion, newObject.dueDate, newObject.creationDate, null]);
+        } else {
+            result = await conn.query(sql, [newObject.title, newObject.completion, newObject.dueDate, newObject.creationDate, newObject.projectID]);
         }
-    })
 
-    statement.finalize()
+        if(result.affectedRows > 0) {
+            let newTaskID = result.insertId
+            
+            if(newObject.assignee != -1){
+                result = await conn.query(assignSQL, [new Date().getTime()/1000, newObject.assignee, newTaskID])
+            }
 
-    // Return a success statement
-    // BUG: Figure out how to return a failure statement here if the queries failed
-    res.send("Success")
+        }
+
+        // Return a success statement
+        res.send("Success")
+    } catch (err){
+        res.status(400).json({"error":err.message})
+        throw err;
+    } finally {
+        if (conn) return conn.end()
+    }
 }
 
 // Update the passed task object in the database
 // TODO: Ensure all these statements run as a transaction so we don't end up with inconsistencies
-function updateTask(req, res, next) {
+async function updateTask(req, res, next) {
     // The object to update
     const updatedObject = req.body
 
     // Prep the sql statement and run it with the specified parameters
     // HACK: Rebuild this to be able to handle only receiving the information that needs to change
-    var statement = db.prepare(`UPDATE Task
-                                SET Completion = ?, DueDate = ?, ProjectID = ?, Title = ?
-                                WHERE TaskID = ?`)
-    statement.run(updatedObject.completion, updatedObject.dueDate, updatedObject.projectID, updatedObject.title, updatedObject.taskID)
-
-    statement.finalize()
+    var sql1 = `UPDATE Task
+                    SET Completion = ?, DueDate = ?, ProjectID = ?, Title = ?
+                    WHERE TaskID = ?`
 
     // Update the completes table with the new assignee
-    var statement2 = db.prepare(`UPDATE Completes
-                            SET DateAssigned = ?, PersonID = ?
-                            WHERE TaskID = ?`)
-    statement2.run(new Date().getTime() / 1000, updatedObject.personID, updatedObject.taskID)
+    var sql2 = `UPDATE Completes
+                    SET DateAssigned = ?, PersonID = ?
+                    WHERE TaskID = ?`
 
-    statement2.finalize()
+    var deleteSql = `DELETE FROM Completes
+                        WHERE TaskID = ?`
 
-    // Return a success statement
-    // BUG: Figure out how to return a failure statement here if the queries failed
-    res.send("Success")
+    var addSql = `INSERT INTO Completes (DateAssigned, PersonID, TaskID) VALUES (?, ?, ?)`
+
+    // Update the specified task and send the response
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        let result;
+
+        if(updatedObject.projectID == -1){
+            result = await conn.query(sql1, [updatedObject.completion, updatedObject.dueDate, null, updatedObject.title, updatedObject.taskID]);
+        } else {
+            result = await conn.query(sql1, [updatedObject.completion, updatedObject.dueDate, updatedObject.projectID, updatedObject.title, updatedObject.taskID]);
+        }
+
+        if(result.affectedRows > 0){
+            // If we are unassigning a person, then we need to remove the tuple from the completes table
+            if(updatedObject.personID == -1){
+                result = await conn.query(deleteSql, [updatedObject.taskID])
+            } else {
+                result = await conn.query(sql2, [new Date().getTime() / 1000, updatedObject.personID, updatedObject.taskID])
+                
+                // If that didn't affect any rows, then we actually need to add a new tuple to the table
+                if(result.affectedRows == 0){
+                    result = await conn.query(addSql, [new Date().getTime() / 1000, updatedObject.personID, updatedObject.taskID])
+                }
+            }
+        }
+
+        // Return a success statement
+        res.send("Success")
+    } catch (err){
+        res.status(400).json({"error":err.message})
+        throw err;
+    } finally {
+        if (conn) return conn.end()
+    }
+
 }
 
 // Mark the task as complete
-// HACK: Integrate this into the updateTask function
-function markCompleted(req, res) {
+async function markCompleted(req, res) {
     const updatedObject = req.body
 
-    var statement = db.prepare(`UPDATE Task
-                                SET Completion = ?
-                                WHERE TaskID = ?`)
-    statement.run(updatedObject.completion, req.params.id)
+    var sql = `UPDATE Task
+                SET Completion = ?
+                WHERE TaskID = ?`
 
-    statement.finalize()
+    // Mark the specified task as completed and then send the response
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        let result = await conn.query(sql, [updatedObject.completion, req.params.id]);
 
-    // Return a success statement
-    // BUG: Figure out how to return a failure statement here if the queries failed
-    res.send("Success")
+        // Return a success statement
+        res.send("Success")
+    } catch (err){
+        res.status(400).json({"error":err.message})
+        throw err;
+    } finally {
+        if (conn) return conn.end()
+    }
 }
 
 // Delete the specified task from the database
-function deleteTask(req, res, next) {
+async function deleteTask(req, res, next) {
     // Prep the sql statement to be run
-    var statement = db.prepare(`DELETE FROM Task
-                                WHERE TaskID = ?`)
+    var sql1 = `DELETE FROM Task
+                    WHERE TaskID = ?`
+    
+    var sql2 = `DELETE FROM Completes
+                    WHERE TaskID = ?`
 
-    // Run the query with the passed id parameter
-    statement.run(req.params.id)
+    // Delete the specified task then send the response
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        // TODO: Run these as a transaction
+        let result = await conn.query(sql2, [req.params.id]);
+        result = await conn.query(sql1, [req.params.id])
 
-    // BUG: Check for errors here before returning success
-    res.send("Success")
+        // Return a success statement
+        res.send("Success")
+    } catch (err){
+        res.status(400).json({"error":err.message})
+        throw err;
+    } finally {
+        if (conn) return conn.end()
+    }
 }
 
 // Return all people from the database
-function getPeople(req, res, next) {
+async function getPeople(req, res, next) {
 
     // Define the query to be fun
     let sql =  `SELECT *
@@ -180,48 +242,52 @@ function getPeople(req, res, next) {
 }
 
 // Return all projects from the database
-function getProjects(req, res, next) {
+async function getProjects(req, res, next) {
 
     // Define the query to be run
     let sql =  `SELECT *
                 FROM Project`
 
-    // Run the above query and call the callback to return all rows as json
-    db.all(sql, [], (err, rows) => {
-        if(err) {
-            res.status(400).json({"error": err.message})
-            return
-        }
-
-        // Set the response to be the new data
+    // Run the above query then set the response to the result set of the query
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        const rows = await conn.query(sql);
         res.json({
             rows
         })
-    })
+    } catch (err){
+        res.status(400).json({"error":err.message})
+        throw err;
+    } finally {
+        if (conn) return conn.end()
+    }
 }
 
 // Return all departments from the database
-function getDepartments(req, res, next) {
+async function getDepartments(req, res, next) {
     // Define the query to be run
     let sql = `SELECT *
                 FROM Department`
 
-    // Run the above query and call the callback to return all rows as json
-    db.all(sql, [], (err, rows) => {
-        if(err) {
-            res.status(400).json({"error": err.message})
-            return
-        }
-
-        // Set the response to be the new data
+    // Run the above query then set the response to the result set of the query
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        const rows = await conn.query(sql);
         res.json({
             rows
         })
-    })
+    } catch (err){
+        res.status(400).json({"error":err.message})
+        throw err;
+    } finally {
+        if (conn) return conn.end()
+    }
 }
 
 // Return all tasks that are a part of the specified project
-function getProjectTasks(req, res, next) {
+async function getProjectTasks(req, res, next) {
 
     // Define the query to be run
     // TODO: Allow the user to specify the ordering
@@ -231,22 +297,24 @@ function getProjectTasks(req, res, next) {
                 WHERE Project.ProjectID =  ${req.params.id}
                 ORDER BY Task.DueDate ASC`
 
-    // Run the above query then call the callback given the full set of rows
-    db.all(sql, [], (err, rows) => {
-        if(err) {
-            res.status(400).json({"error": err.message})
-            return
-        }
-
-        // Set the response to this api call as the data from the database
+    // Run the above query then set the response to the result set of the query
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        const rows = await conn.query(sql);
         res.json({
             rows
         })
-    })
+    } catch (err){
+        res.status(400).json({"error":err.message})
+        throw err;
+    } finally {
+        if (conn) return conn.end()
+    }
 }
 
 // Return all projects and a count of their remaining tasks
-function getProjectOverview(req, res, next) {
+async function getProjectOverview(req, res, next) {
 
     // Define the query to be run
     let sql = ` SELECT Project.Title, count(Task.Completion)-sum(Task.Completion) AS TaskRemaining, Project.DueDate
@@ -255,22 +323,24 @@ function getProjectOverview(req, res, next) {
                 GROUP BY Project.ProjectID
                 ORDER BY Project.DueDate ASC `
 
-    // Run the above query then call the callback given the full set of rows
-    db.all(sql, [], (err, rows) => {
-        if(err) {
-            res.status(400).json({"error": err.message})
-            return
-        }
-
-        // Set the response to this api call as the data from the database
+    // Run the above query then set the response to the result set of the query
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        const rows = await conn.query(sql);
         res.json({
             rows
         })
-    })
+    } catch (err){
+        res.status(400).json({"error":err.message})
+        throw err;
+    } finally {
+        if (conn) return conn.end()
+    }
 }
 
 // Return all people who have done work for the given dept
-function getDepartmentPeople(req, res, next) {
+async function getDepartmentPeople(req, res, next) {
 
     // Define the query to be run
     let sql = ` SELECT Person.FirstName, Person.LastName, Person.JobRole
@@ -284,22 +354,24 @@ function getDepartmentPeople(req, res, next) {
                 ORDER BY Person.LastName `
 
 
-    // Run the above query then call the callback given the full set of rows
-    db.all(sql, [], (err, rows) => {
-        if(err) {
-            res.status(400).json({"error": err.message})
-            return
-        }
-
-        // Set the response to this api call as the data from the database
+    // Run the above query then set the response to the result set of the query
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        const rows = await conn.query(sql);
         res.json({
             rows
         })
-    })
+    } catch (err){
+        res.status(400).json({"error":err.message})
+        throw err;
+    } finally {
+        if (conn) return conn.end()
+    }
 }
 
 // Return a json object containing all projects with tasks that are incomplete
-function getIncompleteProjects(req, res, next) {
+async function getIncompleteProjects(req, res, next) {
 
     // Query returns a list of all project that still have tasks remaining
     // TODO: Find a way to implement this into the frontend
@@ -309,86 +381,98 @@ function getIncompleteProjects(req, res, next) {
                   GROUP BY Project.ProjectID
                   HAVING Task.Completion = 0` // HACK: Will this work to check like that? I'm guessing it's not going to do what we want
 
-    // Run the above query and then call the callback function given the full set of rows
-    db.all(sql, [], (err, rows) => {
-        if(err) {
-            res.status(400).json({"error":err.message})
-            return
-        }
-
-        // Set the response to this api call as the data from the database
+    // Run the above query then set the response to the result set of the query
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        const rows = await conn.query(sql);
         res.json({
             rows
         })
-    })
+    } catch (err){
+        res.status(400).json({"error":err.message})
+        throw err;
+    } finally {
+        if (conn) return conn.end()
+    }
 }
 
 // Get all users whose tasks are all completed or who has no tasks assigned
-function getFreeUsers(req, res){
+async function getFreeUsers(req, res){
 
     var toReturn = []
 
     // Get all users whose tasks are all completed
-    let sql1 = `SELECT PersonID, FirstName, LastName, JobRole
-                FROM (SELECT PersonID, FirstName, LastName, JobRole, Task.Completion
-                    FROM Person NATURAL JOIN Completes NATURAL JOIN Task
+    let sql1 = `SELECT User.PersonID, User.FirstName, User.LastName, User.JobRole, User.Completion
+                FROM (SELECT Person.PersonID, FirstName, LastName, JobRole, Task.Completion
+                    FROM Person JOIN Completes ON Person.PersonID = Completes.PersonID
+                    JOIN Task ON Task.TaskID = Completes.TaskID
                     GROUP BY PersonID, Completion
-                    ORDER BY Completion ASC)
-                GROUP BY PersonID
-                HAVING Completion = 1`
+                    ORDER BY Completion ASC) AS User
+                GROUP BY User.PersonID
+                HAVING User.Completion = 1`
 
-    // Make the first database query
-    db.all(sql1, [], (err, rows) => {
-        if(err) {
-            res.status(400).json({"error": err.message})
-            return
-        }
+    // Get people with no tasks assigned
+    let sql2 = `SELECT Person.PersonID, FirstName, LastName, JobRole
+                FROM Person LEFT JOIN Completes ON Person.PersonID = Completes.PersonID
+                WHERE TaskID IS NULL`
+
+    // Run the above query then set the response to the result set of the query
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        let rows = await conn.query(sql1);
 
         // Add the results of the first query to the array to return
         rows.forEach(row => {
             toReturn.push(row)
         });
 
-        // Get people with no tasks assigned
-        let sql2 = `SELECT PersonID, FirstName, LastName, JobRole
-        FROM Person NATURAL LEFT JOIN Completes
-        WHERE TaskID IS NULL`
+        rows = await conn.query(sql2);
 
-        // Run the second database query
-        db.all(sql2, [], (err, rows) => {
-            if(err) {
-                res.status(400).json({"error": err.message})
-                return
-            }
+        // Add the results of the first query to the array to return
+        rows.forEach(row => {
+            toReturn.push(row)
+        });
 
-            // Add the data from the second query to the list to return
-            rows.forEach(row => {
-                toReturn.push(row)
-            });
-
-            // Return the data
-            res.json({"rows": toReturn})
+        res.json({
+            "rows": toReturn
         })
-    })
+    } catch (err){
+        res.status(400).json({"error":err.message})
+        throw err;
+    } finally {
+        if (conn) return conn.end()
+    }
+
 }
 
 // Get the user that has completed the most tasks
-function getBestUser(req, res){
-    let sql = `SELECT PersonID, FirstName, LastName, JobRole, Max(CompletedTasks) AS TasksCompleted
-                FROM (SELECT PersonID, FirstName, LastName, JobRole, Count(*) AS CompletedTasks
-                    FROM Person NATURAL JOIN Completes NATURAL JOIN Task
+async function getBestUser(req, res){
+
+    let sql = `SELECT User.PersonID, User.FirstName, User.LastName, User.JobRole, User.CompletedTasks
+                FROM (SELECT Person.PersonID, FirstName, LastName, JobRole, Count(*) AS CompletedTasks
+                    FROM Person JOIN Completes ON Person.PersonID = Completes.PersonID
+                    JOIN Task ON Completes.TaskID = Task.TaskID
                     WHERE Completion = 1
-                    GROUP BY PersonID)`
+                    GROUP BY Person.PersonID) AS User
+                ORDER BY User.CompletedTasks DESC
+                LIMIT 1`
 
-    // Get the first row from the query (since it's max, there should only ever by 1 anyway)
-    db.get(sql, [], (err, row) => {
-        if(err) {
-            res.status(400).json({"error":err.message})
-            return
-        }
-
-        res.json(row)
-    })
+    // Run the above query then set the response to the result set of the query
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        const rows = await conn.query(sql);
+        res.json({
+            rows
+        })
+    } catch (err){
+        res.status(400).json({"error":err.message})
+        throw err;
+    } finally {
+        if (conn) return conn.end()
+    }
 }
 
 module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getDepartments, getProjectTasks, getIncompleteProjects, addTask, updateTask, deleteTask, markCompleted, getFreeUsers, getBestUser, getProjectOverview, getDepartmentPeople }
