@@ -4,32 +4,44 @@ const sqlite3 = require('sqlite3').verbose()
 // Initialize a new database from the specified file path relative to the backend index.js (not this file)
 const db = new sqlite3.Database('./data.db')
 
+const mariadb = require('mariadb')
+
+const pool = mariadb.createPool({
+    host: '10.0.52.18',
+    user: 'appuser',
+    password: 'AppUser123@',
+    connectionLimit: 5,
+    database: 'task_data'
+})
+
 // Return a json object containing all tasks in the Task table
-function getAllTasks(req, res, next) {
+async function getAllTasks(req, res, next) {
 
     // Define the query to be run
     // TODO: Allow the user to specify the ordering
-    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle, Completes.PersonID
-                FROM Task LEFT NATURAL JOIN Completes LEFT JOIN Project
-                ON Task.ProjectID = Project.ProjectID
+    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle, Completes.PersonID 
+                FROM Task LEFT JOIN Completes ON Task.TaskID = Completes.TaskID 
+                LEFT JOIN Project ON Task.ProjectID = Project.ProjectID 
                 ORDER BY Task.DueDate ASC`
 
-    // Run the above query and then call the callback function given the full set of rows
-    db.all(sql, [], (err, rows) => {
-        if(err) {
-            res.status(400).json({"error":err.message})
-            return
-        }
-
-        // Set the response to this api call as the data from the database
+    // Run the above query then set the response to the result set of the query
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        const rows = await conn.query(sql);
         res.json({
             rows
         })
-    })
+    } catch (err){
+        res.status(400).json({"error":err.message})
+        throw err;
+    } finally {
+        if (conn) return conn.end()
+    }
 }
 
 // Return all tasks assigned to the specified person. This person should be passed to the request as a parameter called id
-function getPersonsTasks(req, res, next) {
+async function getPersonsTasks(req, res, next) {
 
     if(req.params.id == -1){
         return getAllTasks(req, res, next)
@@ -38,32 +50,30 @@ function getPersonsTasks(req, res, next) {
     // Define the query to be run
     // TODO: Allow the user to specify the ordering
     let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle, Completes.PersonID
-                FROM Completes JOIN Task
-                ON Completes.TaskID = Task.TaskID
-                LEFT JOIN Project
-                ON Task.ProjectID = Project.ProjectID
+                FROM Completes JOIN Task ON Completes.TaskID = Task.TaskID
+                LEFT JOIN Project ON Task.ProjectID = Project.ProjectID
                 WHERE Completes.PersonID = ${req.params.id}
                 ORDER BY Task.DueDate ASC`
 
-    // Run the above query then call the callback given the full set of rows
-    db.all(sql, [], (err, rows) => {
-        if(err) {
-            res.status(400).json({"error": err.message})
-            return
-        }
-
-        // Set the response to this api call as the data from the database
+    // Run the above query then set the response to the result set of the query
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        const rows = await conn.query(sql);
         res.json({
             rows
         })
-    })
+    } catch (err){
+        res.status(400).json({"error":err.message})
+        throw err;
+    } finally {
+        if (conn) return conn.end()
+    }
 }
 
 // Add a new task to the database
 function addTask(req, res, next) {
     const newObject = req.body
-
-    console.log(newObject)
 
     // Prepare the sql statement to be run.
     var statement = db.prepare("INSERT INTO Task (Title, Completion, DueDate, CreationDate, ProjectID) VALUES (?, ?, ?, ?, ?)")

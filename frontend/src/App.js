@@ -30,6 +30,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 // TODO: Make sure this whole app works on mobile too
+// BUG: Figure out why refresh doesn't work on pages
 
 // Build the JSX to export for this component. This defines how the entire app is structured
 function App() {

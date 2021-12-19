@@ -86,6 +86,7 @@ export function TaskTable({ rows, projects, people, taskUpdate }) {
       setUpdateProject(event.target.value)
     }
   
+    // BUG: This sometimes seems to fail, but not all the time
     const handleUpdatePersonChange = (event) => {
       setUpdatePerson(event.target.value)
     }

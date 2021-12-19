@@ -5,11 +5,13 @@ const options = {cors: {origin: "*",},};
 const { getAllTasks, getPersonsTasks, getPeople, getProjects, getDepartments, getProjectTasks, getIncompleteProjects, addTask, updateTask, deleteTask, markCompleted, getFreeUsers, getBestUser, getProjectOverview, getDepartmentPeople } = require('./database')
 
 // Define the port to run the backend on as the enviroment variable for port, or 3500 if that variable is not defined
-const PORT = process.env.PORT || 3500;
+const PORT = process.env.PORT || 8080;
 
 // Ensure the express app uses these modules
 app.use(cors())
 app.use(express.json())
+app.use(express.static('build'))
+app.use(require('helmet')())
 
 // Get all tasks on get request or add a new task on post
 app.route('/api/tasks')
