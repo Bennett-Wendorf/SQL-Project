@@ -166,8 +166,7 @@ export function UserTasks() {
       <Dialog open={isDialogOpen} onClose={handleClose}>
         <DialogTitle>Add a New Task</DialogTitle>
         <DialogContent>
-          {/* BUG: Limit how long these strings are so they don't break the database */}
-          <TextField autoFocus id="Title" label="Title" type="text" fullWidth variant="outlined" margin="normal" onChange={handleNewTitleChange} value={newTaskTitle}/>
+          <TextField autoFocus id="Title" label="Title" type="text" fullWidth variant="outlined" margin="normal" onChange={handleNewTitleChange} value={newTaskTitle} inputProps={{maxLength: 100}} helperText={`${newTaskTitle.length}/100`}/>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DesktopDatePicker label="Due Date" inputFormat="MM/dd/yyyy" value={newTaskDate} onChange={handleNewDateChange} renderInput={(params) => <TextField margin="normal" {...params}/>} />
           </LocalizationProvider>

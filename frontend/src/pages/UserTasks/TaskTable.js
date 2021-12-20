@@ -196,8 +196,7 @@ export function TaskTable({ rows, projects, people, taskUpdate }) {
             Modify task "{selectedTask.Title}"
           </DialogTitle>
           <DialogContent>
-            {/* BUG: Limit how long these strings are so they don't break the database */}
-            <TextField autoFocus id="Title" label="Title" type="text" fullWidth variant="outlined" margin="normal" onChange={handleUpdateTitleChange} value={updateTitle}/>
+            <TextField autoFocus id="Title" label="Title" type="text" fullWidth variant="outlined" margin="normal" onChange={handleUpdateTitleChange} value={updateTitle} inputProps={{maxLength: 100}} helperText={`${updateTitle.length}/100`}/>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DesktopDatePicker label="Due Date" inputFormat="MM/dd/yyyy" renderInput={(params) => <TextField margin="normal" {...params}/>} onChange={handleUpdateDateChange} value={updateDueDate}/>
             </LocalizationProvider>

@@ -1,6 +1,6 @@
 // Do some necessary imports for React to function properly
 import React from "react";
-import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
+import { HashRouter as Router, Switch, Route, Redirect } from "react-router-dom";
 
 // Import Page component definitons
 import { UserTasks, Project, Manage, Department } from "./pages";

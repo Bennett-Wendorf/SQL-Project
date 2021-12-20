@@ -14,8 +14,7 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "helmet": "^4.6.0",
-    "mariadb": "^2.5.5",
-    "sqlite3": "^5.0.2"
+    "mariadb": "^2.5.5"
   },
   "devDependencies": {
     "nodemon": "^2.0.14"

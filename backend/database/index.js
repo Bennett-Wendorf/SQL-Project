@@ -1,9 +1,3 @@
-// Import sqlite3 module
-const sqlite3 = require('sqlite3').verbose()
-
-// Initialize a new database from the specified file path relative to the backend index.js (not this file)
-const db = new sqlite3.Database('./data.db')
-
 const mariadb = require('mariadb')
 
 const pool = mariadb.createPool({
@@ -228,17 +222,19 @@ async function getPeople(req, res, next) {
                 FROM Person`
 
     // Run the above query and call the callback to return all rows as json
-    db.all(sql, [], (err, rows) => {
-        if(err) {
-            res.status(400).json({"error": err.message})
-            return
-        }
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        let result = await conn.query(sql, [req.params.id]);
 
-        // Set the response to be the new data
-        res.json({
-            rows
-        })
-    })
+        // Return a success statement
+        res.send("Success")
+    } catch (err){
+        res.status(400).json({"error":err.message})
+        throw err;
+    } finally {
+        if (conn) return conn.end()
+    }
 }
 
 // Return all projects from the database
