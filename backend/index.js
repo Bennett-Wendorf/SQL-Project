@@ -3,7 +3,7 @@ const app = express()
 const cors = require('cors')
 const helmet = require('helmet')
 const options = {cors: {origin: "*",},};
-const { getAllTasks, getPersonsTasks, getPeople, getProjects, getDepartments, getProjectTasks, getIncompleteProjects, addTask, updateTask, deleteTask, markCompleted, getFreeUsers, getBestUser, getProjectOverview, getDepartmentPeople } = require('./database')
+const { getAllTasks, getPersonsTasks, getPeople, getProjects, getDepartments, getProjectTasks, addTask, updateTask, deleteTask, markCompleted, getFreeUsers, getBestUser, getProjectOverview, getDepartmentPeople } = require('./database')
 
 // Define the port to run the backend on as the enviroment variable for port, or 8080 if that variable is not defined
 const PORT = process.env.PORT || 8080;
@@ -25,7 +25,6 @@ app.route('/api/tasks')
 app.put('/api/tasks/:id', updateTask)
 
 // Mark the task completed
-// HACK: This is a bad way of doing this (integrate into updateTask)
 app.put('/api/task/complete/:id', markCompleted)
 
 // Delete the task with the specified id
@@ -51,9 +50,6 @@ app.get('/api/departments', getDepartments)
 
 // Get all tasks part of the project with the specified id
 app.get('/api/tasks/project/:id', getProjectTasks)
-
-// Get all projects that have incomplete tasks
-app.get('/api/projects/incomplete', getIncompleteProjects)
 
 // Gets project overview (main query for project page)
 app.get('/api/projects/overview', getProjectOverview)

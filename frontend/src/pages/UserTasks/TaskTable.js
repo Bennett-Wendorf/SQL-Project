@@ -1,5 +1,5 @@
 // Import React stuff
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 // Import utilites and components
 import api from "../../utils/api";
@@ -24,7 +24,6 @@ import DesktopDatePicker from '@mui/lab/DesktopDatePicker';
 import { makeStyles } from "@mui/styles";
 
 // Setup a general format for dates
-// TODO: Does this need to be accessible anywhere else?
 const dateFormatOptions = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }
 
 // Generate some themeing for this component
@@ -44,8 +43,9 @@ export function TaskTable({ rows, projects, people, taskUpdate }) {
     // Grab the selected person piece of state so it can later be passed to the taskUpdate function
     const selectedPerson = useStore(state => state.selectedPerson)
   
-    // Create relevant pieces of state for the dialog popup
+    // Create relevant pieces of state for the dialog popups
     const [isModifyDialogOpen, setIsModifyDialogOpen] = useState(false)
+    const [isDeleteConfOpen, setIsDeleteConfOpen] = useState(false)
     const [selectedTask, setSelectedTask] = useState({})
   
     // Create pieces of state for handling task updates
@@ -93,13 +93,20 @@ export function TaskTable({ rows, projects, people, taskUpdate }) {
     const handleClose = () => {
       setIsModifyDialogOpen(false)
     }
+
+    const handleConfirmationClose = () => {
+      setIsDeleteConfOpen(false)
+    }
+
+    const handleDeleteConfirmation = () => {
+      setIsDeleteConfOpen(true)
+    }
   
     // Handle database update on submission of the dialog
     const handleSubmit = () => {
       setIsModifyDialogOpen(false)
   
       // Create the new updated task object
-      // TODO: Consider only passing information that was actually modified
       const updatedTask = {
         title: updateTitle,
         completion: updateComplete,
@@ -111,7 +118,6 @@ export function TaskTable({ rows, projects, people, taskUpdate }) {
       }
   
       // Make a call to the backend api to update the task
-      // BUG: Check for an error response here
       api.put(`/api/tasks/${updatedTask.taskID}`, updatedTask)
       .then(response => {
         taskUpdate(selectedPerson)
@@ -119,9 +125,9 @@ export function TaskTable({ rows, projects, people, taskUpdate }) {
     }
   
     // Handle when the delete button is pressed for a selected task
-    // TODO: Add deletion confirmation
     const handleDelete = () => {
       setIsModifyDialogOpen(false)
+      setIsDeleteConfOpen(false)
   
       // Make the call to the backend to delete the selected task
       api.delete(`/api/tasks/delete/${taskID}`)
@@ -133,7 +139,6 @@ export function TaskTable({ rows, projects, people, taskUpdate }) {
     const handleCompletion = (event, taskToComplete) => {
   
       // Suppress opening of the dialog box when the checkbox is clicked
-      // TODO: Consider a better way to do this
       setIsModifyDialogOpen(false)
   
       const updatedTask = {
@@ -223,9 +228,22 @@ export function TaskTable({ rows, projects, people, taskUpdate }) {
   
           {/* Generate the buttons to act as actions on the dialog popup */}
           <DialogActions>
-            <Button onClick={handleDelete} color="error">Delete Task</Button>
+            <Button onClick={handleDeleteConfirmation} color="error">Delete Task</Button>
             <Button onClick={handleClose}>Cancel</Button>
             <Button onClick={handleSubmit}>Confirm</Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog open={isDeleteConfOpen} onClose={handleConfirmationClose}>
+          <DialogTitle>
+            Confirm
+          </DialogTitle>
+          <DialogContent>
+            Are you sure you want to delete task: "{selectedTask.Title}"?
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleConfirmationClose}>Cancel</Button>
+            <Button onClick={handleDelete} color="error">Confirm Delete</Button>
           </DialogActions>
         </Dialog>
       </>

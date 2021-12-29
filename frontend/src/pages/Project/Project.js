@@ -10,7 +10,6 @@ import api from "../../utils/api";
 // Create the Project page component
 export function Project() {
   // Setup a general format for dates
-  // TODO: Make global??
   const dateFormatOptions = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }
 
   const [projectTasks, setProjectTasks] = useState ([])

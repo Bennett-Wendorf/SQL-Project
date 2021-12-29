@@ -92,7 +92,6 @@ export function UserTasks() {
     }
 
     // Send a request to the backend to create a new task
-    // BUG: Check for an error response here
     api.post(`/api/tasks`, newTask)
       .then(response => {
         updateTasks(selectedPerson)
@@ -102,7 +101,6 @@ export function UserTasks() {
   }
 
   // Make an api call to the backend to update the list of tasks
-  // TODO: Call this incrementally
   const updateTasks = (sp) => {
     api.get(`/api/tasks/person/${sp.personID}`)
     .then(response => {
@@ -113,7 +111,6 @@ export function UserTasks() {
   }
 
   // Make a call to the backend to update the list of projeccts
-  // TODO: Call this incrementally
   const updateProjects = () => {
     api.get(`/api/projects`)
     .then(response => {
@@ -124,7 +121,6 @@ export function UserTasks() {
   }
 
   // Make a call to the backend to update the list of people
-  // TODO: Call this incrementally
   const updatePeople = () => {
     api.get(`/api/people`)
     .then(response => {

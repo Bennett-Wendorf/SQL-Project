@@ -22,7 +22,6 @@ export function Department() {
     updateDepartmentPeople(event.target.value)
   }
 
-  // TODO: update this incrementally
   const updateDepartments = () => {
     api.get('/api/departments')
       .then(response => {

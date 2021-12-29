@@ -12,7 +12,6 @@ const pool = mariadb.createPool({
 async function getAllTasks(req, res, next) {
 
     // Define the query to be run
-    // TODO: Allow the user to specify the ordering
     let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle, Completes.PersonID 
                 FROM Task LEFT JOIN Completes ON Task.TaskID = Completes.TaskID 
                 LEFT JOIN Project ON Task.ProjectID = Project.ProjectID 
@@ -37,12 +36,12 @@ async function getAllTasks(req, res, next) {
 // Return all tasks assigned to the specified person. This person should be passed to the request as a parameter called id
 async function getPersonsTasks(req, res, next) {
 
+    // If no user was specified to pull tasks for, then we should just pull information for all users
     if(req.params.id == -1){
         return getAllTasks(req, res, next)
     }
 
     // Define the query to be run
-    // TODO: Allow the user to specify the ordering
     let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle, Completes.PersonID
                 FROM Completes JOIN Task ON Completes.TaskID = Task.TaskID
                 LEFT JOIN Project ON Task.ProjectID = Project.ProjectID
@@ -79,12 +78,14 @@ async function addTask(req, res, next) {
         conn = await pool.getConnection();
         let result;
 
+        // Check if the project id is valid, and make the query accordingly. This is needed because Mariadb stores null values where our api is designed to handle -1 instead
         if(newObject.projectID == -1){
             result = await conn.query(sql, [newObject.title, newObject.completion, newObject.dueDate, newObject.creationDate, null]);
         } else {
             result = await conn.query(sql, [newObject.title, newObject.completion, newObject.dueDate, newObject.creationDate, newObject.projectID]);
         }
 
+        // As long as some rows ere affected by the insert statement, we can then insert into the completes table to assign the task
         if(result.affectedRows > 0) {
             let newTaskID = result.insertId
             
@@ -105,13 +106,11 @@ async function addTask(req, res, next) {
 }
 
 // Update the passed task object in the database
-// TODO: Ensure all these statements run as a transaction so we don't end up with inconsistencies
 async function updateTask(req, res, next) {
     // The object to update
     const updatedObject = req.body
 
     // Prep the sql statement and run it with the specified parameters
-    // HACK: Rebuild this to be able to handle only receiving the information that needs to change
     var sql1 = `UPDATE Task
                     SET Completion = ?, DueDate = ?, ProjectID = ?, Title = ?
                     WHERE TaskID = ?`
@@ -121,9 +120,9 @@ async function updateTask(req, res, next) {
                     SET DateAssigned = ?, PersonID = ?
                     WHERE TaskID = ?`
 
+    // Prep statements for adding to and deleting from the completes table as well
     var deleteSql = `DELETE FROM Completes
                         WHERE TaskID = ?`
-
     var addSql = `INSERT INTO Completes (DateAssigned, PersonID, TaskID) VALUES (?, ?, ?)`
 
     // Update the specified task and send the response
@@ -132,24 +131,39 @@ async function updateTask(req, res, next) {
         conn = await pool.getConnection();
         let result;
 
-        if(updatedObject.projectID == -1){
-            result = await conn.query(sql1, [updatedObject.completion, updatedObject.dueDate, null, updatedObject.title, updatedObject.taskID]);
-        } else {
-            result = await conn.query(sql1, [updatedObject.completion, updatedObject.dueDate, updatedObject.projectID, updatedObject.title, updatedObject.taskID]);
-        }
+        // Start a transaction to ensure the two queries succeed or fail together
+        await conn.beginTransaction()
 
-        if(result.affectedRows > 0){
-            // If we are unassigning a person, then we need to remove the tuple from the completes table
-            if(updatedObject.personID == -1){
-                result = await conn.query(deleteSql, [updatedObject.taskID])
+        try{
+
+            // Check if the project id is valid, and make the query accordingly. This is needed because Mariadb stores null values where our api is designed to handle -1 instead
+            if(updatedObject.projectID == -1){
+                result = await conn.query(sql1, [updatedObject.completion, updatedObject.dueDate, null, updatedObject.title, updatedObject.taskID]);
             } else {
-                result = await conn.query(sql2, [new Date().getTime() / 1000, updatedObject.personID, updatedObject.taskID])
-                
-                // If that didn't affect any rows, then we actually need to add a new tuple to the table
-                if(result.affectedRows == 0){
-                    result = await conn.query(addSql, [new Date().getTime() / 1000, updatedObject.personID, updatedObject.taskID])
+                result = await conn.query(sql1, [updatedObject.completion, updatedObject.dueDate, updatedObject.projectID, updatedObject.title, updatedObject.taskID]);
+            }
+
+            if(result.affectedRows > 0){
+                // If we are unassigning a person, then we need to remove the tuple from the completes table
+                if(updatedObject.personID == -1){
+                    result = await conn.query(deleteSql, [updatedObject.taskID])
+                } else {
+                    result = await conn.query(sql2, [new Date().getTime() / 1000, updatedObject.personID, updatedObject.taskID])
+                    
+                    // If that didn't affect any rows, then we actually need to add a new tuple to the table
+                    if(result.affectedRows == 0){
+                        result = await conn.query(addSql, [new Date().getTime() / 1000, updatedObject.personID, updatedObject.taskID])
+                    }
                 }
             }
+
+            await conn.commit()
+
+        } catch(err){
+            console.error("Error loading data, reverting changes: ", err);
+            await conn.rollback();
+            res.send("Failure")
+            return;
         }
 
         // Return a success statement
@@ -200,9 +214,21 @@ async function deleteTask(req, res, next) {
     let conn;
     try {
         conn = await pool.getConnection();
-        // TODO: Run these as a transaction
-        let result = await conn.query(sql2, [req.params.id]);
-        result = await conn.query(sql1, [req.params.id])
+
+        // Start a transaction to ensure the two queries succeed or fail together
+        await conn.beginTransaction()
+
+        try{
+            let result = await conn.query(sql2, [req.params.id]);
+            result = await conn.query(sql1, [req.params.id])
+
+            await conn.commit()
+        }catch(err){
+            console.error("Error loading data, reverting changes: ", err);
+            await conn.rollback();
+            res.send("Failure")
+            return;
+        }
 
         // Return a success statement
         res.send("Success")
@@ -287,7 +313,6 @@ async function getDepartments(req, res, next) {
 async function getProjectTasks(req, res, next) {
 
     // Define the query to be run
-    // TODO: Allow the user to specify the ordering
     let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Project.Title AS ProjectTitle, Project.ProjectID
                 FROM Task JOIN Project
                 ON Task.ProjectID = Project.ProjectID
@@ -356,33 +381,6 @@ async function getDepartmentPeople(req, res, next) {
     try {
         conn = await pool.getConnection();
         const rows = await conn.query(sql, [req.params.id]);
-        res.json({
-            rows
-        })
-    } catch (err){
-        res.status(400).json({"error":err.message})
-        throw err;
-    } finally {
-        if (conn) return conn.end()
-    }
-}
-
-// Return a json object containing all projects with tasks that are incomplete
-async function getIncompleteProjects(req, res, next) {
-
-    // Query returns a list of all project that still have tasks remaining
-    // TODO: Find a way to implement this into the frontend
-    let sql = `SELECT Project.Title AS ProjectTitle, Project.DueDate, count(TaskID) as TaskCount
-                  FROM Project JOIN Task
-                    ON Project.ProjectID = Task.ProjectID
-                  GROUP BY Project.ProjectID
-                  HAVING Task.Completion = 0` // HACK: Will this work to check like that? I'm guessing it's not going to do what we want
-
-    // Run the above query then set the response to the result set of the query
-    let conn;
-    try {
-        conn = await pool.getConnection();
-        const rows = await conn.query(sql);
         res.json({
             rows
         })
@@ -472,4 +470,4 @@ async function getBestUser(req, res){
     }
 }
 
-module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getDepartments, getProjectTasks, getIncompleteProjects, addTask, updateTask, deleteTask, markCompleted, getFreeUsers, getBestUser, getProjectOverview, getDepartmentPeople }
+module.exports = { getAllTasks, getPersonsTasks, getPeople, getProjects, getDepartments, getProjectTasks, addTask, updateTask, deleteTask, markCompleted, getFreeUsers, getBestUser, getProjectOverview, getDepartmentPeople }
