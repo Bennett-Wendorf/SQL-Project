@@ -46,14 +46,14 @@ async function getPersonsTasks(req, res, next) {
     let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle, Completes.PersonID
                 FROM Completes JOIN Task ON Completes.TaskID = Task.TaskID
                 LEFT JOIN Project ON Task.ProjectID = Project.ProjectID
-                WHERE Completes.PersonID = ${req.params.id}
+                WHERE Completes.PersonID = ?
                 ORDER BY Task.DueDate ASC`
 
     // Run the above query then set the response to the result set of the query
     let conn;
     try {
         conn = await pool.getConnection();
-        const rows = await conn.query(sql);
+        const rows = await conn.query(sql, [req.params.id]);
         res.json({
             rows
         })
@@ -225,10 +225,11 @@ async function getPeople(req, res, next) {
     let conn;
     try {
         conn = await pool.getConnection();
-        let result = await conn.query(sql, [req.params.id]);
+        let rows = await conn.query(sql, [req.params.id]);
 
-        // Return a success statement
-        res.send("Success")
+        res.json({
+            rows
+        })
     } catch (err){
         res.status(400).json({"error":err.message})
         throw err;
@@ -290,14 +291,14 @@ async function getProjectTasks(req, res, next) {
     let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Project.Title AS ProjectTitle, Project.ProjectID
                 FROM Task JOIN Project
                 ON Task.ProjectID = Project.ProjectID
-                WHERE Project.ProjectID =  ${req.params.id}
+                WHERE Project.ProjectID = ?
                 ORDER BY Task.DueDate ASC`
 
     // Run the above query then set the response to the result set of the query
     let conn;
     try {
         conn = await pool.getConnection();
-        const rows = await conn.query(sql);
+        const rows = await conn.query(sql, [req.params.id]);
         res.json({
             rows
         })
@@ -345,7 +346,7 @@ async function getDepartmentPeople(req, res, next) {
                   AND Completes.TaskID = Task.TaskID
                   AND Task.ProjectID = Project.ProjectID
                   AND Project.ProjectID = Houses.ProjectID
-                WHERE Houses.DeptID = ${req.params.id}
+                WHERE Houses.DeptID = ?
                 GROUP BY Person.PersonID
                 ORDER BY Person.LastName `
 
@@ -354,7 +355,7 @@ async function getDepartmentPeople(req, res, next) {
     let conn;
     try {
         conn = await pool.getConnection();
-        const rows = await conn.query(sql);
+        const rows = await conn.query(sql, [req.params.id]);
         res.json({
             rows
         })
