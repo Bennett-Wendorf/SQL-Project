@@ -39,35 +39,44 @@ export function Manage() {
   return (
     <>
       <Bar title="Manage"/>
-      <Toolbar>Free Users</Toolbar>
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="Free Users">
+      <Paper sx={{ width: '100%', mb: 2 }}>
+        <Toolbar>
+          <Typography variant="h5">Free Users</Typography>
+        </Toolbar>
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 650 }} aria-label="Free Users">
 
-          {/* Generate the headers of the rows */}
-          <TableHead>
-            <TableRow>
-              <TableCell align="left">First Name</TableCell>
-              <TableCell align="left">Last Name</TableCell>
-              <TableCell align="right">Job Role</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {/* Map each task from the backend to a row in the table */}
-            {freeUsers.map((row) => (
-              <TableRow
-                key={row.PersonID}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                <TableCell align="left">{row.FirstName}</TableCell>
-                <TableCell align="left">{row.LastName}</TableCell>
-                <TableCell align="right">{row.JobRole}</TableCell>
+            {/* Generate the headers of the rows */}
+            <TableHead>
+              <TableRow>
+                <TableCell align="left">First Name</TableCell>
+                <TableCell align="left">Last Name</TableCell>
+                <TableCell align="right">Job Role</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {/* Map each task from the backend to a row in the table */}
+              {freeUsers.map((row) => (
+                <TableRow
+                  key={row.PersonID}
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                >
+                  <TableCell align="left">{row.FirstName}</TableCell>
+                  <TableCell align="left">{row.LastName}</TableCell>
+                  <TableCell align="right">{row.JobRole}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+      {freeUsers.length <= 0 &&
+        <Typography variant="h6" align="center" sx={{ marginTop: "10px"}}>There are no people to display here. :(</Typography>
+      }
       <br/>
-      <Typography>The most productive person is {bestUser.FirstName} {bestUser.LastName} with a total of {bestUser.CompletedTasks} tasks completed.</Typography>
+      {bestUser.PersonID &&
+        <Typography>The most productive person is {bestUser.FirstName} {bestUser.LastName} with a total of {bestUser.CompletedTasks} tasks completed.</Typography>
+      }
     </>
   );
 }

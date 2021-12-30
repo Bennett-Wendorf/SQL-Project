@@ -12,7 +12,7 @@ const pool = mariadb.createPool({
 async function getAllTasks(req, res, next) {
 
     // Define the query to be run
-    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle, Completes.PersonID 
+    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle, Completes.PersonID, Completes.DateAssigned
                 FROM Task LEFT JOIN Completes ON Task.TaskID = Completes.TaskID 
                 LEFT JOIN Project ON Task.ProjectID = Project.ProjectID 
                 ORDER BY Task.DueDate ASC`
@@ -42,7 +42,7 @@ async function getPersonsTasks(req, res, next) {
     }
 
     // Define the query to be run
-    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle, Completes.PersonID
+    let sql = `SELECT Task.TaskID, Task.Title, Task.Completion, Task.DueDate, Task.CreationDate, Task.ProjectID, Project.Title AS ProjectTitle, Completes.PersonID, Completes.DateAssigned
                 FROM Completes JOIN Task ON Completes.TaskID = Task.TaskID
                 LEFT JOIN Project ON Task.ProjectID = Project.ProjectID
                 WHERE Completes.PersonID = ?

@@ -10,11 +10,11 @@ import CheckIcon from '@mui/icons-material/CheckCircleOutline';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 
 // Import general mui stuff
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Button, Tooltip } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Button, Tooltip, Typography } from '@mui/material';
 
 // Import dialog stuff from mui
 import { TextField, Dialog, DialogActions, DialogContent, DialogTitle, Select, MenuItem } from "@mui/material";
-import { FormControl, InputLabel } from "@mui/material";
+import { FormControl, InputLabel, FormHelperText } from "@mui/material";
 
 // Import date picker and localization
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
@@ -152,7 +152,6 @@ export function TaskTable({ rows, projects, people, taskUpdate }) {
         })
     }
   
-    // TODO: Add spinner/message when rows is empty array
     return (
       <>
         {/* Build the task table */}
@@ -184,13 +183,17 @@ export function TaskTable({ rows, projects, people, taskUpdate }) {
                   </TableCell>
                   <TableCell>{row.Title}</TableCell>
                   <TableCell align="right" size="small">{row.ProjectID === -1 ? "None" : row.ProjectTitle}</TableCell>
-                  {/* TODO: Turn this date red if the date has passed */}
-                  <TableCell align="right" size="small">{new Date(row.DueDate * 1000).toLocaleDateString("en-US", dateFormatOptions)}</TableCell>
+                  {/* Display the due date of the given task, and in a red font if the date has passed */}
+                  <TableCell align="right" size="small" sx={row.DueDate < new Date().getTime()/1000 ? 'color: red' : ''}>{new Date(row.DueDate * 1000).toLocaleDateString("en-US", dateFormatOptions)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
+
+        {rows.length <= 0 &&
+          <Typography variant="h6" align="center" sx={{ marginTop: "10px"}}>There are no tasks to display here. :(</Typography>
+        }
   
         {/* The popup dialog for editing and deleting tasks */}
         <Dialog open={isModifyDialogOpen} onClose={handleClose}>
@@ -222,8 +225,8 @@ export function TaskTable({ rows, projects, people, taskUpdate }) {
                   <MenuItem key={row.PersonID} value={row.PersonID}>{row.FirstName + " " + row.LastName}</MenuItem>
                 ))}
               </Select>
+              <FormHelperText>Last assigned {selectedTask.DateAssigned != null ? `on ${new Date(selectedTask.DateAssigned * 1000).toLocaleDateString("en-US", dateFormatOptions)}` : "never"}</FormHelperText>
             </FormControl>
-            {/* TODO: Add label for when task was last assigned */}
           </DialogContent>
   
           {/* Generate the buttons to act as actions on the dialog popup */}
@@ -234,6 +237,7 @@ export function TaskTable({ rows, projects, people, taskUpdate }) {
           </DialogActions>
         </Dialog>
 
+        {/* Popup dialog for confirming deletion of a task */}
         <Dialog open={isDeleteConfOpen} onClose={handleConfirmationClose}>
           <DialogTitle>
             Confirm

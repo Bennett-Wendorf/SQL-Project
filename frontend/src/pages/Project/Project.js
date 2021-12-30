@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Bar from "../../components/Bar/Bar";
 
 // Import general mui stuff
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from "@mui/material";
 
 // Import utilites and components
 import api from "../../utils/api";
@@ -12,19 +12,19 @@ export function Project() {
   // Setup a general format for dates
   const dateFormatOptions = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }
 
-  const [projectTasks, setProjectTasks] = useState ([])
+  const [projects, setProjects] = useState ([])
 
-  const updateProjectTasks = () => {
+  const updateProjects = () => {
     api.get(`/api/projects/overview`)
     .then(response => {
-      setProjectTasks(response.data ? response.data.rows : [])
-      console.log("Updating project tasks");
+      setProjects(response.data ? response.data.rows : [])
+      console.log("Updating projects page");
     })
     .catch(err => console.log(err))
   }
 
   useEffect(() => {
-    updateProjectTasks()
+    updateProjects()
   }, [])
 
   // For now, return a button to show on this component.
@@ -44,7 +44,7 @@ export function Project() {
           </TableHead>
           <TableBody>
             {/* Map each task from the backend to a row in the table */}
-            {projectTasks.map((row) => (
+            {projects.map((row) => (
               // Handle mouse pointer on hover
               <TableRow
                 key={row.TaskID}
@@ -58,6 +58,10 @@ export function Project() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {projects.length <= 0 &&
+        <Typography variant="h6" align="center" sx={{ marginTop: "10px"}}>There are no projects to display here. :(</Typography>
+      }
 
     </div>
   );
