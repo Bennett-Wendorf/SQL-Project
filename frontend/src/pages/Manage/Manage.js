@@ -13,23 +13,19 @@ export function Manage() {
   const [freeUsers, setFreeUsers] = useState([])
   const [bestUser, setBestUser] = useState({})
 
-  // TODO: Make this refresh when tasks are reassigned
   const updateFreeUsers = () => {
     api.get('/api/people/free')
       .then(response => {
-        // TODO: Check for error response
         setFreeUsers(response.data ? response.data.rows : [])
         console.log("Updating free users")
       })
       .catch(err => console.log(err))
   }
 
-  // TODO: Update this incrementally
   const updateBestUser = () => {
     api.get('/api/people/best')
       .then(response => {
-        // TODO: Check for error response
-        setBestUser(response.data ? response.data : {})
+        setBestUser(response.data ? response.data.rows[0] : {})
         console.log("Updating best user")
       })
       .catch(err => console.log(err))
@@ -43,35 +39,44 @@ export function Manage() {
   return (
     <>
       <Bar title="Manage"/>
-      <Toolbar>Free Users</Toolbar>
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="Free Users">
+      <Paper sx={{ width: '100%', mb: 2 }}>
+        <Toolbar>
+          <Typography variant="h5">Free Users</Typography>
+        </Toolbar>
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 650 }} aria-label="Free Users">
 
-          {/* Generate the headers of the rows */}
-          <TableHead>
-            <TableRow>
-              <TableCell align="left">First Name</TableCell>
-              <TableCell align="left">Last Name</TableCell>
-              <TableCell align="right">Job Role</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {/* Map each task from the backend to a row in the table */}
-            {freeUsers.map((row) => (
-              <TableRow
-                key={row.PersonID}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                <TableCell align="left">{row.FirstName}</TableCell>
-                <TableCell align="left">{row.LastName}</TableCell>
-                <TableCell align="right">{row.JobRole}</TableCell>
+            {/* Generate the headers of the rows */}
+            <TableHead>
+              <TableRow>
+                <TableCell align="left">First Name</TableCell>
+                <TableCell align="left">Last Name</TableCell>
+                <TableCell align="right">Job Role</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {/* Map each task from the backend to a row in the table */}
+              {freeUsers.map((row) => (
+                <TableRow
+                  key={row.PersonID}
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                >
+                  <TableCell align="left">{row.FirstName}</TableCell>
+                  <TableCell align="left">{row.LastName}</TableCell>
+                  <TableCell align="right">{row.JobRole}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+      {freeUsers.length <= 0 &&
+        <Typography variant="h6" align="center" sx={{ marginTop: "10px"}}>There are no people to display here. :(</Typography>
+      }
       <br/>
-      <Typography>The most productive person is {bestUser.FirstName} {bestUser.LastName} with a total of {bestUser.TasksCompleted} tasks completed.</Typography>
+      {bestUser.PersonID &&
+        <Typography>The most productive person is {bestUser.FirstName} {bestUser.LastName} with a total of {bestUser.CompletedTasks} tasks completed.</Typography>
+      }
     </>
   );
 }

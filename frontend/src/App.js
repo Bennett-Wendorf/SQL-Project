@@ -1,6 +1,6 @@
 // Do some necessary imports for React to function properly
 import React from "react";
-import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
+import { HashRouter as Router, Switch, Route, Redirect } from "react-router-dom";
 
 // Import Page component definitons
 import { UserTasks, Project, Manage, Department } from "./pages";
@@ -28,8 +28,6 @@ const useStyles = makeStyles((theme) => ({
 
   toolbar: theme.mixins.toolbar,
 }));
-
-// TODO: Make sure this whole app works on mobile too
 
 // Build the JSX to export for this component. This defines how the entire app is structured
 function App() {

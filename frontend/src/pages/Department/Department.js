@@ -4,7 +4,7 @@ import Bar from "../../components/Bar/Bar";
 // Import general mui stuff
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Toolbar } from "@mui/material";
 
-import { FormControl, Select, MenuItem, InputLabel } from '@mui/material';
+import { FormControl, Select, MenuItem, InputLabel, Typography } from '@mui/material';
 
 // Import utilites and components
 import api from "../../utils/api";
@@ -22,11 +22,9 @@ export function Department() {
     updateDepartmentPeople(event.target.value)
   }
 
-  // TODO: update this incrementally
   const updateDepartments = () => {
     api.get('/api/departments')
       .then(response => {
-        // TODO: Check for error response
         setDepartments(response.data ? response.data.rows : [])
         console.log("Updating departments")
       })
@@ -36,7 +34,6 @@ export function Department() {
   const updateDepartmentPeople = (sd) => {
     api.get(`/api/people/department/${sd}`)
     .then(response => {
-      // TODO: Check response for error
       setDepartmentPeople(response.data ? response.data.rows : [])
       console.log("Updating department people");
     })
@@ -51,7 +48,7 @@ export function Department() {
   return (
     <>
       <Bar title="Department">
-        <FormControl sx={{ m: 2, minWidth: 120 }} justify="left">
+        <FormControl sx={{ minWidth: 120, maxWidth: 250 }} size="small" justify="left">
           <InputLabel id="dept-select-label">Department</InputLabel>
           <Select labelId="dept-select-label" id="dept-select" label="Department" value={departmentSelect} onChange={handleDeptSelectChange}>
             {departments.map((row) => (
@@ -60,33 +57,42 @@ export function Department() {
           </Select>
         </FormControl>
       </Bar>
-      <Toolbar>Employees</Toolbar>
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="Free Users">
 
-          {/* Generate the headers of the rows */}
-          <TableHead>
-            <TableRow>
-              <TableCell align="left">First Name</TableCell>
-              <TableCell align="left">Last Name</TableCell>
-              <TableCell align="right">Job Role</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {/* Map each task from the backend to a row in the table */}
-            {departmentPeople.map((row) => (
-              <TableRow
-                key={row.PersonID}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                <TableCell align="left">{row.FirstName}</TableCell>
-                <TableCell align="left">{row.LastName}</TableCell>
-                <TableCell align="right">{row.JobRole}</TableCell>
+      <Paper>
+        <Toolbar>
+          <Typography variant="h5">Employees</Typography>
+        </Toolbar>
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 650 }} aria-label="Free Users">
+
+            {/* Generate the headers of the rows */}
+            <TableHead>
+              <TableRow>
+                <TableCell align="left">First Name</TableCell>
+                <TableCell align="left">Last Name</TableCell>
+                <TableCell align="right">Job Role</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {/* Map each task from the backend to a row in the table */}
+              {departmentPeople.map((row) => (
+                <TableRow
+                  key={row.PersonID}
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                >
+                  <TableCell align="left">{row.FirstName}</TableCell>
+                  <TableCell align="left">{row.LastName}</TableCell>
+                  <TableCell align="right">{row.JobRole}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+
+      {departmentPeople.length <= 0 &&
+        <Typography variant="h6" align="center" sx={{ marginTop: "10px"}}>There are no people to display here. :(</Typography>
+      }
       <br/>
     </>
   );

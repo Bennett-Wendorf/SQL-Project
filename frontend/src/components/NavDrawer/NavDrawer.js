@@ -98,10 +98,8 @@ function PersonMenu(){
   const setSelectedPerson = useStore(state => state.setSelectedPerson)
 
   // The first time this component renders, make the call to the backend to get the list of people
-  // TODO: Call this incrementally
   useEffect(() => api.get('/api/people')
     .then(response => { 
-      // BUG: Check response for error
       setPeople(response.data ? response.data.rows : [])
     })
     .catch(err => console.log(err)), [])
