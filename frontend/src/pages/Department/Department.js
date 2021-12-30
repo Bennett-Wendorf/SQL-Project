@@ -48,7 +48,7 @@ export function Department() {
   return (
     <>
       <Bar title="Department">
-        <FormControl sx={{ minWidth: 120 }} size="small" justify="left">
+        <FormControl sx={{ minWidth: 120, maxWidth: 250 }} size="small" justify="left">
           <InputLabel id="dept-select-label">Department</InputLabel>
           <Select labelId="dept-select-label" id="dept-select" label="Department" value={departmentSelect} onChange={handleDeptSelectChange}>
             {departments.map((row) => (
