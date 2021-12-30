@@ -21,10 +21,9 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <!-- TODO Add logo here -->
-  <!-- <a href="https://github.com/bennett-wendorf/SQL-Project">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a> -->
+  <a href="https://github.com/bennett-wendorf/SQL-Project">
+    <img src="frontend/src/res/logo.ico" alt="Logo" width="100" height="100">
+  </a>
 
   <h1 align="center">Task Organizer</h3>
 
