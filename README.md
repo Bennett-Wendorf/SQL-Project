@@ -185,4 +185,4 @@ Project Link: [https://github.com/Bennett-Wendorf/SQL-Project](https://github.co
 [issues-shield]: https://img.shields.io/github/issues/bennett-wendorf/SQL-Project.svg?style=flat&color=red
 [issues-url]: https://github.com/bennett-wendorf/SQL-Project/issues
 [license-shield]: https://img.shields.io/github/license/bennett-wendorf/SQL-Project.svg?style=flat
-[license-url]: https://github.com/bennett-wendorf/SQL-Project/blob/master/LICENSE.txt
+[license-url]: https://github.com/bennett-wendorf/SQL-Project/blob/master/LICENSE
